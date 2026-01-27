@@ -2,15 +2,22 @@
 /**
  * Simple live test for Productboard MCP Server
  * Verifies the server returns real data from Productboard API
+ *
+ * Note: Loads credentials from .env.bak for local testing.
+ * In production, Claude Desktop passes credentials via MCP config.
  */
 
 import { spawn, ChildProcess } from 'child_process';
 import { EventEmitter } from 'events';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { config } from 'dotenv';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Load from .env.bak for local testing (if it exists)
+config({ path: path.join(__dirname, '.env.bak') });
 
 class MCPClient extends EventEmitter {
   private process: ChildProcess;

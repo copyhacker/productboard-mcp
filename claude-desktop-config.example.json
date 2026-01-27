@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "productboard": {
+      "command": "node",
+      "args": ["/Users/jonathan/code/productboard-mcp/dist/index.js"],
+      "env": {
+        "PRODUCTBOARD_API_TOKEN": "your-productboard-api-token-here",
+        "PRODUCTBOARD_API_BASE_URL": "https://api.productboard.com",
+        "CACHE_ENABLED": "true",
+        "LOG_LEVEL": "info"
+      }
+    }
+  }
+}

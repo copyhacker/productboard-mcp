@@ -139,45 +139,56 @@ A **complete** Model Context Protocol (MCP) server that provides comprehensive i
    npm start
    ```
 
-### Environment Configuration
+### Configuration for Claude Desktop
 
-Create a `.env` file with your Productboard credentials:
+**The `.env` file is NOT needed for production use.** Configuration is done through Claude Desktop's config file.
+
+1. **Get your Productboard API token**
+   - Go to your Productboard workspace settings
+   - Navigate to API Keys section
+   - Generate a new token or copy existing one
+
+2. **Configure Claude Desktop**
+
+   Edit your Claude Desktop config file:
+   - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+   - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+   Add the Productboard MCP server configuration:
+
+   ```json
+   {
+     "mcpServers": {
+       "productboard": {
+         "command": "node",
+         "args": ["/path/to/productboard-mcp/dist/index.js"],
+         "env": {
+           "PRODUCTBOARD_API_TOKEN": "your-actual-api-token-here"
+         }
+       }
+     }
+   }
+   ```
+
+   Replace `/path/to/productboard-mcp` with the full path to this repository.
+
+3. **Restart Claude Desktop**
+
+   The Productboard tools will now be available in Claude!
+
+### Local Development & Testing
+
+For local development and testing only, you can create a `.env` file:
 
 ```bash
-# Bearer Token Authentication (recommended for getting started)
-PRODUCTBOARD_API_TOKEN=your-api-token
+# Copy the example and edit with your credentials
+cp .env.example .env
 
-# OAuth2 Authentication (for production use)
-OAUTH_CLIENT_ID=your-client-id
-OAUTH_CLIENT_SECRET=your-client-secret
-
-# API Configuration (IMPORTANT: Do NOT include /v1 in the base URL)
-# The API version is specified via X-Version header, not the URL path
-PRODUCTBOARD_API_BASE_URL=https://api.productboard.com
-
-# Server Configuration
-MCP_SERVER_PORT=3000
-LOG_LEVEL=info
-CACHE_ENABLED=true
+# Edit .env with your Productboard API token
+# PRODUCTBOARD_API_TOKEN=your-api-token
 ```
 
-### MCP Client Configuration
-
-Add this server to your MCP client configuration:
-
-```json
-{
-  "mcpServers": {
-    "productboard": {
-      "command": "node",
-      "args": ["/path/to/productboard-mcp-private/dist/index.js"],
-      "env": {
-        "PRODUCTBOARD_API_TOKEN": "your-token-here"
-      }
-    }
-  }
-}
-```
+**Note**: The `.env` file is git-ignored and only used for local testing. Claude Desktop uses the config file above.
 
 ## Development
 
