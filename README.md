@@ -151,6 +151,10 @@ PRODUCTBOARD_API_TOKEN=your-api-token
 OAUTH_CLIENT_ID=your-client-id
 OAUTH_CLIENT_SECRET=your-client-secret
 
+# API Configuration (IMPORTANT: Do NOT include /v1 in the base URL)
+# The API version is specified via X-Version header, not the URL path
+PRODUCTBOARD_API_BASE_URL=https://api.productboard.com
+
 # Server Configuration
 MCP_SERVER_PORT=3000
 LOG_LEVEL=info
