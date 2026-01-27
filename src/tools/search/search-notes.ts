@@ -115,37 +115,81 @@ export class SearchNotesTool extends BaseTool<SearchNotesParams> {
     try {
       this.logger.info('Searching notes', { query: params.query });
 
-      const queryParams: Record<string, any> = {
-        q: params.query,
-        sort: params.sort || 'relevance',
-        order: params.order || 'desc',
-        limit: params.limit || 20,
-        offset: params.offset || 0,
-      };
+      const queryParams: Record<string, any> = {};
 
+      // Map filters to /notes endpoint parameters (if supported)
       if (params.filters) {
-        if (params.filters.customer_emails?.length) queryParams.customer_emails = params.filters.customer_emails.join(',');
-        if (params.filters.company_names?.length) queryParams.company_names = params.filters.company_names.join(',');
-        if (params.filters.tags?.length) queryParams.tags = params.filters.tags.join(',');
-        if (params.filters.source?.length) queryParams.source = params.filters.source.join(',');
         if (params.filters.created_after) queryParams.created_after = params.filters.created_after;
         if (params.filters.created_before) queryParams.created_before = params.filters.created_before;
         if (params.filters.feature_ids?.length) queryParams.feature_ids = params.filters.feature_ids.join(',');
       }
 
+      // Map sort to what /notes endpoint supports (typically created_at)
+      if (params.sort === 'created_at') {
+        queryParams.sort = 'created_at';
+        queryParams.order = params.order || 'desc';
+      }
+
+      // Productboard API doesn't have a /search/notes endpoint
+      // Use the /notes endpoint and filter client-side
       const response = await this.apiClient.makeRequest({
         method: 'GET',
-        endpoint: '/search/notes',
+        endpoint: '/notes',
         params: queryParams,
       });
 
+      // Filter results client-side based on query and other filters
+      let filteredData = response;
+      if (response && (response as any).data && Array.isArray((response as any).data)) {
+        const query = params.query?.toLowerCase() || '';
+        let matched = (response as any).data;
+
+        // Apply text search filter
+        if (query && query !== '*') {
+          matched = matched.filter((note: any) =>
+            note.title?.toLowerCase().includes(query) ||
+            note.content?.toLowerCase().includes(query)
+          );
+        }
+
+        // Apply additional filters
+        if (params.filters) {
+          if (params.filters.customer_emails?.length) {
+            const emails = params.filters.customer_emails.map(e => e.toLowerCase());
+            matched = matched.filter((note: any) =>
+              emails.includes(note.customer?.email?.toLowerCase())
+            );
+          }
+
+          if (params.filters.tags?.length) {
+            const tags = params.filters.tags.map(t => t.toLowerCase());
+            matched = matched.filter((note: any) =>
+              note.tags?.some((tag: any) => tags.includes(tag.name?.toLowerCase()))
+            );
+          }
+        }
+
+        // Apply offset and limit
+        const offset = params.offset || 0;
+        const limit = params.limit || 20;
+        const paginated = matched.slice(offset, offset + limit);
+
+        filteredData = {
+          ...(response as any),
+          data: paginated,
+          total: matched.length,
+          offset,
+          limit,
+        };
+      }
+
       return {
         success: true,
-        data: response,
+        data: filteredData,
       };
     } catch (error) {
       this.logger.error('Failed to search notes', error);
-      
+
       return {
         success: false,
         error: `Failed to search notes: ${(error as Error).message}`,

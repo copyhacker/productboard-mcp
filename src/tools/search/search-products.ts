@@ -59,25 +59,49 @@ export class SearchProductsTool extends BaseTool<SearchProductsParams> {
       this.logger.info('Searching products', { query: params.query });
 
       const queryParams: Record<string, any> = {
-        q: params.query,
         include_components: params.includeComponents !== false,
-        limit: params.limit || 20,
-        offset: params.offset || 0,
       };
 
+      // Productboard API doesn't have a /search/products endpoint
+      // Use the /products endpoint and filter client-side
       const response = await this.apiClient.makeRequest({
         method: 'GET',
-        endpoint: '/search/products',
+        endpoint: '/products',
         params: queryParams,
       });
 
+      // Filter results client-side based on query
+      let filteredData = response;
+      if (params.query && params.query !== '*' && response && (response as any).data && Array.isArray((response as any).data)) {
+        const query = params.query.toLowerCase();
+        const allProducts = (response as any).data;
+
+        const matched = allProducts.filter((product: any) =>
+          product.name?.toLowerCase().includes(query) ||
+          product.description?.toLowerCase().includes(query)
+        );
+
+        // Apply offset and limit
+        const offset = params.offset || 0;
+        const limit = params.limit || 20;
+        const paginated = matched.slice(offset, offset + limit);
+
+        filteredData = {
+          ...(response as any),
+          data: paginated,
+          total: matched.length,
+          offset,
+          limit,
+        };
+      }
+
       return {
         success: true,
-        data: response,
+        data: filteredData,
       };
     } catch (error) {
       this.logger.error('Failed to search products', error);
-      
+
       return {
         success: false,
         error: `Failed to search products: ${(error as Error).message}`,

@@ -53,27 +53,81 @@ export class GlobalSearchTool extends BaseTool<GlobalSearchParams> {
     try {
       this.logger.info('Performing global search', { query: params.query });
 
-      const queryParams: Record<string, any> = {
-        q: params.query,
-        limit: params.limit || 10,
-      };
+      const limit = params.limit || 10;
+      const query = params.query.toLowerCase();
+      const searchTypes = params.types || ['feature', 'note', 'product'];
 
-      if (params.types && params.types.length > 0) {
-        queryParams.types = params.types.join(',');
+      // Productboard API doesn't have a /search endpoint
+      // We need to search each entity type separately and combine results
+      const results: any = {};
+
+      // Search features if requested
+      if (searchTypes.includes('feature')) {
+        try {
+          const featureResponse = await this.apiClient.makeRequest({
+            method: 'GET',
+            endpoint: '/features',
+            params: { limit: 100 }, // Fetch more for better filtering
+          });
+
+          if (featureResponse && (featureResponse as any).data) {
+            results.features = ((featureResponse as any).data as any[])
+              .filter((f: any) =>
+                f.name?.toLowerCase().includes(query) ||
+                f.description?.toLowerCase().includes(query)
+              )
+              .slice(0, limit);
+          }
+        } catch (error) {
+          this.logger.debug('Failed to search features', error);
+          results.features = [];
+        }
       }
 
-      const response = await this.apiClient.makeRequest({
-        method: 'GET',
-        endpoint: '/search',
-        params: queryParams,
-      });
+      // Search products if requested
+      if (searchTypes.includes('product')) {
+        try {
+          const productResponse = await this.apiClient.makeRequest({
+            method: 'GET',
+            endpoint: '/products',
+            params: { limit: 100 },
+          });
 
-      // Extract search results
-      let results: any = {};
-      if (response && (response as any).data) {
-        results = (response as any).data;
-      } else if (response && typeof response === 'object') {
-        results = response;
+          if (productResponse && (productResponse as any).data) {
+            results.products = ((productResponse as any).data as any[])
+              .filter((p: any) =>
+                p.name?.toLowerCase().includes(query) ||
+                p.description?.toLowerCase().includes(query)
+              )
+              .slice(0, limit);
+          }
+        } catch (error) {
+          this.logger.debug('Failed to search products', error);
+          results.products = [];
+        }
+      }
+
+      // Search notes if requested
+      if (searchTypes.includes('note')) {
+        try {
+          const noteResponse = await this.apiClient.makeRequest({
+            method: 'GET',
+            endpoint: '/notes',
+            params: { limit: 100 },
+          });
+
+          if (noteResponse && (noteResponse as any).data) {
+            results.notes = ((noteResponse as any).data as any[])
+              .filter((n: any) =>
+                n.title?.toLowerCase().includes(query) ||
+                n.content?.toLowerCase().includes(query)
+              )
+              .slice(0, limit);
+          }
+        } catch (error) {
+          this.logger.debug('Failed to search notes', error);
+          results.notes = [];
+        }
       }
       
       // Format search results by type
