@@ -45,7 +45,10 @@ export abstract class BaseTool<TParams = unknown> implements Tool {
 
     // Execute the tool-specific logic
     try {
-      return await this.executeInternal(params);
+      const result = await this.executeInternal(params);
+
+      // Wrap result in MCP content format if not already wrapped
+      return this.formatMCPResponse(result);
     } catch (error) {
       if (error instanceof Error) {
         throw new ToolExecutionError(
@@ -56,6 +59,33 @@ export abstract class BaseTool<TParams = unknown> implements Tool {
       }
       throw error;
     }
+  }
+
+  /**
+   * Format the tool result in MCP content format
+   * If the result is already in MCP format (has content array), return as-is
+   * Otherwise, wrap it in the MCP content structure
+   */
+  protected formatMCPResponse(result: unknown): unknown {
+    // Check if already in MCP format
+    if (
+      result &&
+      typeof result === 'object' &&
+      'content' in result &&
+      Array.isArray((result as any).content)
+    ) {
+      return result;
+    }
+
+    // Wrap in MCP content format
+    return {
+      content: [
+        {
+          type: 'text',
+          text: typeof result === 'string' ? result : JSON.stringify(result, null, 2),
+        },
+      ],
+    };
   }
 
   protected abstract executeInternal(params: TParams): Promise<unknown>;

@@ -89,11 +89,11 @@ export class MCPProtocolHandler implements ProtocolHandler {
     if (!tool) {
       throw new ProtocolError(`Tool not found: ${toolName}`);
     }
-    
+
     try {
       this.logger.debug(`Invoking tool: ${toolName}`, { params });
       const result = await tool.execute(params);
-      this.logger.debug(`Tool ${toolName} completed successfully`);
+      this.logger.debug(`Tool ${toolName} completed. Result type: ${typeof result}, has content: ${!!(result && typeof result === 'object' && 'content' in result)}`);
       return result;
     } catch (error) {
       this.logger.error(`Tool ${toolName} execution failed`, error);

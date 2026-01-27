@@ -320,7 +320,9 @@ export class ProductboardMCPServer {
           throw new ProtocolError('Tool name is required and must be a string');
         }
 
+        logger.debug(`Executing tool: ${name}`);
         const result = await this.handleToolExecution(name, args);
+        logger.debug(`Tool execution result type: ${typeof result}, has content: ${!!(result && typeof result === 'object' && 'content' in result)}`);
 
         this.metrics.requestsSuccess++;
         this.updateResponseTime(Date.now() - startTime);
@@ -379,8 +381,10 @@ export class ProductboardMCPServer {
       return cachedResult;
     }
 
+    logger.debug(`About to invoke tool: ${toolName}`);
     // Execute tool
     const result = await protocolHandler.invokeTool(toolName, params);
+    logger.debug(`Got result from invokeTool. Type: ${typeof result}`);
 
     // Cache result if applicable
     if (cache.shouldCache({ tool: toolName, method: toolName, params })) {
