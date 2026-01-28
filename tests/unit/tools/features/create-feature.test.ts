@@ -150,9 +150,13 @@ describe('CreateFeatureTool', () => {
       const result = await tool.execute(validInput);
 
       expect(mockClient.post).toHaveBeenCalledWith('/features', validInput);
-      expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('feat_123456')
+          })
+        ])
       });
     });
 
@@ -165,10 +169,14 @@ describe('CreateFeatureTool', () => {
       mockClient.post.mockRejectedValueOnce(new Error('API Error'));
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
-        success: false,
-        error: 'Failed to create feature: API Error',
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('Failed to create feature')
+          })
+        ])
       });
     });
 
@@ -191,10 +199,14 @@ describe('CreateFeatureTool', () => {
       mockClient.post.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
-        success: false,
-        error: 'Failed to create feature: Authentication failed',
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('Failed to create feature')
+          })
+        ])
       });
     });
 
@@ -222,10 +234,14 @@ describe('CreateFeatureTool', () => {
       mockClient.post.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
-        success: false,
-        error: 'Failed to create feature: Validation error',
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('Failed to create feature')
+          })
+        ])
       });
     });
 
@@ -236,10 +252,14 @@ describe('CreateFeatureTool', () => {
         description: 'Implement OAuth2 authentication for mobile app',
       };
       const result = await uninitializedTool.execute(validInput);
-      
-      expect(result).toEqual({
-        success: false,
-        error: expect.stringContaining('Failed to create feature:'),
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('Failed to create feature')
+          })
+        ])
       });
     });
 
@@ -287,13 +307,14 @@ describe('CreateFeatureTool', () => {
         description: 'Test Description',
       });
 
-      expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('feat_123')
+          })
+        ])
       });
-      expect((result as any).data).toHaveProperty('id', 'feat_123');
-      expect((result as any).data).toHaveProperty('name', 'Test Feature');
-      expect((result as any).data).toHaveProperty('created_at');
     });
   });
 });

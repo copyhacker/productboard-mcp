@@ -168,7 +168,15 @@ describe('UpdateObjectiveTool', () => {
         description: 'Updated description',
         status: 'active',
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -194,7 +202,15 @@ describe('UpdateObjectiveTool', () => {
       expect(mockClient.put).toHaveBeenCalledWith('/objectives/obj_123', {
         status: 'completed',
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -207,7 +223,15 @@ describe('UpdateObjectiveTool', () => {
 
       const result = await tool.execute(input);
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'No update fields provided',
       });
@@ -223,8 +247,16 @@ describe('UpdateObjectiveTool', () => {
       mockClient.put.mockRejectedValueOnce(new Error('API Error'));
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'Failed to update objective: API Error',
       });
@@ -249,8 +281,16 @@ describe('UpdateObjectiveTool', () => {
       mockClient.put.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'Failed to update objective: Objective not found',
       });
@@ -275,8 +315,16 @@ describe('UpdateObjectiveTool', () => {
       mockClient.put.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'Failed to update objective: Authentication failed',
       });
@@ -305,8 +353,16 @@ describe('UpdateObjectiveTool', () => {
       mockClient.put.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'Failed to update objective: Validation error',
       });
@@ -319,8 +375,16 @@ describe('UpdateObjectiveTool', () => {
         name: 'Updated Objective',
       };
       const result = await uninitializedTool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: expect.stringContaining('Failed to update objective:'),
       });
@@ -345,13 +409,21 @@ describe('UpdateObjectiveTool', () => {
         name: 'Updated Objective',
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: apiResponse,
       });
-      expect((result as any).data).toHaveProperty('id', 'obj_123');
-      expect((result as any).data).toHaveProperty('name', 'Updated Objective');
-      expect((result as any).data).toHaveProperty('updated_at');
+      expect(response.data).toHaveProperty('id', 'obj_123');
+      expect(response.data).toHaveProperty('name', 'Updated Objective');
+      expect(response.data).toHaveProperty('updated_at');
     });
   });
 });

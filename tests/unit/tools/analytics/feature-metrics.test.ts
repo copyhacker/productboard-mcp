@@ -159,8 +159,15 @@ describe('FeatureMetricsTool', () => {
         params: {},
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: expectedResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -209,8 +216,15 @@ describe('FeatureMetricsTool', () => {
         },
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: expectedResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -221,8 +235,15 @@ describe('FeatureMetricsTool', () => {
       const result = await tool.execute({});
       
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to get feature metrics: API Error',
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: false,
+              error: 'Failed to get feature metrics: API Error',
+            }, null, 2),
+          },
+        ],
       });
       expect(mockLogger.error).toHaveBeenCalledWith('Failed to get feature metrics', error);
     });
@@ -242,8 +263,15 @@ describe('FeatureMetricsTool', () => {
       const result = await tool.execute({});
       
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to get feature metrics: Authentication failed',
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: false,
+              error: 'Failed to get feature metrics: Authentication failed',
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -262,8 +290,15 @@ describe('FeatureMetricsTool', () => {
       const result = await tool.execute({});
       
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to get feature metrics: Insufficient permissions',
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: false,
+              error: 'Failed to get feature metrics: Insufficient permissions',
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -272,8 +307,12 @@ describe('FeatureMetricsTool', () => {
       const result = await uninitializedTool.execute({});
       
       expect(result).toEqual({
-        success: false,
-        error: expect.stringContaining('Failed to get feature metrics:'),
+        content: [
+          {
+            type: 'text',
+            text: expect.stringContaining('Failed to get feature metrics:'),
+          },
+        ],
       });
     });
 
@@ -298,8 +337,15 @@ describe('FeatureMetricsTool', () => {
         params: {},
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: expectedResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
   });
@@ -337,13 +383,21 @@ describe('FeatureMetricsTool', () => {
       });
 
       expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: apiResponse,
+            }, null, 2),
+          },
+        ],
       });
-      expect((result as any).data).toHaveProperty('summary');
-      expect((result as any).data).toHaveProperty('metrics');
-      expect((result as any).data.summary).toHaveProperty('total_features', 10);
-      expect((result as any).data.metrics[0]).toHaveProperty('feature_id', 'feat_123');
+      const parsedContent = JSON.parse((result as any).content[0].text);
+      expect(parsedContent.data).toHaveProperty('summary');
+      expect(parsedContent.data).toHaveProperty('metrics');
+      expect(parsedContent.data.summary).toHaveProperty('total_features', 10);
+      expect(parsedContent.data.metrics[0]).toHaveProperty('feature_id', 'feat_123');
     });
 
     it('should handle minimal response structure', async () => {
@@ -359,8 +413,15 @@ describe('FeatureMetricsTool', () => {
       const result = await tool.execute({});
 
       expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: apiResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
   });

@@ -99,8 +99,15 @@ describe('CreateNoteTool', () => {
       expect(mockApiClient.post).toHaveBeenCalledWith('/notes', validParams);
 
       expect(result).toEqual({
-        success: true,
-        data: mockCreatedNote,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: mockCreatedNote,
+            }, null, 2),
+          },
+        ],
       });
 
       expect(mockLogger.info).toHaveBeenCalledWith('Creating note');
@@ -129,7 +136,8 @@ describe('CreateNoteTool', () => {
 
       expect(mockApiClient.post).toHaveBeenCalledWith('/notes', fullParams);
 
-      expect((result as any).data).toMatchObject(fullParams);
+      const parsedResult = JSON.parse((result as any).content[0].text);
+      expect(parsedResult.data).toMatchObject(fullParams);
     });
 
     it('should validate required content parameter', async () => {
@@ -171,8 +179,15 @@ describe('CreateNoteTool', () => {
       const result = await tool.execute(paramsWithFeatures);
 
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to create note: One or more features not found',
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: false,
+              error: 'Failed to create note: One or more features not found',
+            }, null, 2),
+          },
+        ],
       });
 
       expect(mockLogger.error).toHaveBeenCalledWith(
@@ -195,7 +210,8 @@ describe('CreateNoteTool', () => {
 
       const result = await tool.execute(paramsWithCustomer);
 
-      expect((result as any).success).toBe(true);
+      const parsedResult = JSON.parse((result as any).content[0].text);
+      expect(parsedResult.success).toBe(true);
     });
   });
 });

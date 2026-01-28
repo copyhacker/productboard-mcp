@@ -160,7 +160,15 @@ describe('ListObjectivesTool', () => {
         endpoint: '/objectives',
         params: {},
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -206,7 +214,15 @@ describe('ListObjectivesTool', () => {
           offset: 5,
         },
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -236,7 +252,15 @@ describe('ListObjectivesTool', () => {
           limit: 5,
         },
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -246,8 +270,16 @@ describe('ListObjectivesTool', () => {
       mockClient.makeRequest.mockRejectedValueOnce(new Error('API Error'));
 
       const result = await tool.execute({});
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'Failed to list objectives: API Error',
       });
@@ -267,8 +299,16 @@ describe('ListObjectivesTool', () => {
       mockClient.makeRequest.mockRejectedValueOnce(error);
 
       const result = await tool.execute({});
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'Failed to list objectives: Authentication failed',
       });
@@ -288,8 +328,16 @@ describe('ListObjectivesTool', () => {
       mockClient.makeRequest.mockRejectedValueOnce(error);
 
       const result = await tool.execute({});
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'Failed to list objectives: Insufficient permissions',
       });
@@ -298,8 +346,16 @@ describe('ListObjectivesTool', () => {
     it('should throw error if client not initialized', async () => {
       const uninitializedTool = new ListObjectivesTool(null as any, mockLogger);
       const result = await uninitializedTool.execute({});
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: expect.stringContaining('Failed to list objectives:'),
       });
@@ -328,13 +384,21 @@ describe('ListObjectivesTool', () => {
 
       const result = await tool.execute({});
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: apiResponse,
       });
-      expect((result as any).data).toHaveProperty('objectives');
-      expect((result as any).data).toHaveProperty('total', 1);
-      expect((result as any).data.objectives[0]).toHaveProperty('id', 'obj_123');
+      expect(response.data).toHaveProperty('objectives');
+      expect(response.data).toHaveProperty('total', 1);
+      expect(response.data.objectives[0]).toHaveProperty('id', 'obj_123');
     });
 
     it('should handle empty results', async () => {
@@ -349,11 +413,19 @@ describe('ListObjectivesTool', () => {
 
       const result = await tool.execute({});
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: apiResponse,
       });
-      expect((result as any).data.objectives).toHaveLength(0);
+      expect(response.data.objectives).toHaveLength(0);
     });
   });
 });

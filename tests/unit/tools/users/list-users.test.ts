@@ -77,7 +77,10 @@ describe('ListUsersTool', () => {
     ];
 
     it('should list all users with default parameters', async () => {
-      mockApiClient.makeRequest.mockResolvedValue(mockUsers);
+      mockApiClient.makeRequest.mockResolvedValue({
+        data: mockUsers,
+        links: {},
+      });
 
       const result = await tool.execute({});
 
@@ -87,7 +90,15 @@ describe('ListUsersTool', () => {
         params: {},
       });
 
-      expect(result).toEqual({
+      expect(result).toHaveProperty('content');
+      expect((result as any).content).toBeInstanceOf(Array);
+      expect((result as any).content[0]).toMatchObject({
+        type: 'text',
+        text: expect.any(String),
+      });
+
+      const parsedResult = JSON.parse((result as any).content[0].text);
+      expect(parsedResult).toEqual({
         success: true,
         data: {
           users: mockUsers,
@@ -101,7 +112,10 @@ describe('ListUsersTool', () => {
     it('should filter by role', async () => {
       const adminUsers = [mockUsers[0]];
 
-      mockApiClient.makeRequest.mockResolvedValue(adminUsers);
+      mockApiClient.makeRequest.mockResolvedValue({
+        data: adminUsers,
+        links: {},
+      });
 
       const result = await tool.execute({ role: 'admin' });
 
@@ -111,14 +125,18 @@ describe('ListUsersTool', () => {
         params: { role: 'admin' },
       });
 
-      expect((result as any).data.users).toHaveLength(1);
-      expect((result as any).data.users[0].role).toBe('admin');
+      const parsedResult = JSON.parse((result as any).content[0].text);
+      expect(parsedResult.data.users).toHaveLength(1);
+      expect(parsedResult.data.users[0].role).toBe('admin');
     });
 
     it('should filter by active status', async () => {
       const activeUsers = mockUsers;
 
-      mockApiClient.makeRequest.mockResolvedValue(activeUsers);
+      mockApiClient.makeRequest.mockResolvedValue({
+        data: activeUsers,
+        links: {},
+      });
 
       await tool.execute({ active: true });
 
@@ -130,9 +148,10 @@ describe('ListUsersTool', () => {
     });
 
     it('should search users by name or email', async () => {
-      const searchResults = [mockUsers[0]];
-
-      mockApiClient.makeRequest.mockResolvedValue(searchResults);
+      mockApiClient.makeRequest.mockResolvedValue({
+        data: mockUsers,
+        links: {},
+      });
 
       const result = await tool.execute({ search: 'admin' });
 
@@ -142,11 +161,15 @@ describe('ListUsersTool', () => {
         params: { search: 'admin' },
       });
 
-      expect((result as any).data.users).toHaveLength(1);
+      const parsedResult = JSON.parse((result as any).content[0].text);
+      expect(parsedResult.data.users).toHaveLength(1);
     });
 
     it('should combine multiple filters', async () => {
-      mockApiClient.makeRequest.mockResolvedValue([mockUsers[1]]);
+      mockApiClient.makeRequest.mockResolvedValue({
+        data: [mockUsers[1]],
+        links: {},
+      });
 
       await tool.execute({
         role: 'contributor',
@@ -172,11 +195,15 @@ describe('ListUsersTool', () => {
     });
 
     it('should handle empty results', async () => {
-      mockApiClient.makeRequest.mockResolvedValue([]);
+      mockApiClient.makeRequest.mockResolvedValue({
+        data: [],
+        links: {},
+      });
 
       const result = await tool.execute({ role: 'viewer' });
 
-      expect(result).toEqual({
+      const parsedResult = JSON.parse((result as any).content[0].text);
+      expect(parsedResult).toEqual({
         success: true,
         data: {
           users: [],

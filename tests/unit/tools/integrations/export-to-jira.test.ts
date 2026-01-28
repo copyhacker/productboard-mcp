@@ -203,8 +203,13 @@ describe('ExportToJiraTool', () => {
         field_mapping: undefined,
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
       expect(mockLogger.info).toHaveBeenCalledWith(
         'Exporting features to JIRA',
@@ -262,8 +267,13 @@ describe('ExportToJiraTool', () => {
         },
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
     });
 
@@ -278,8 +288,13 @@ describe('ExportToJiraTool', () => {
       const result = await tool.execute(validInput);
       
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to export to JIRA: JIRA API connection failed',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to export to JIRA: JIRA API connection failed',
+          }, null, 2),
+        }],
       });
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Failed to export to JIRA',
@@ -308,8 +323,13 @@ describe('ExportToJiraTool', () => {
       const result = await tool.execute(validInput);
       
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to export to JIRA: JIRA authentication failed',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to export to JIRA: JIRA authentication failed',
+          }, null, 2),
+        }],
       });
     });
 
@@ -334,8 +354,13 @@ describe('ExportToJiraTool', () => {
       const result = await tool.execute(validInput);
       
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to export to JIRA: JIRA project not found',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to export to JIRA: JIRA project not found',
+          }, null, 2),
+        }],
       });
     });
 
@@ -375,8 +400,13 @@ describe('ExportToJiraTool', () => {
       const result = await tool.execute(validInput);
 
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
     });
 
@@ -388,7 +418,8 @@ describe('ExportToJiraTool', () => {
       };
       const result = await uninitializedTool.execute(validInput);
       
-      expect(result).toEqual({
+      const resultObj = JSON.parse((result as any).content[0].text);
+      expect(resultObj).toMatchObject({
         success: false,
         error: expect.stringContaining('Failed to export to JIRA:'),
       });
@@ -481,13 +512,19 @@ describe('ExportToJiraTool', () => {
       });
 
       expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: apiResponse,
+          }, null, 2),
+        }],
       });
-      expect((result as any).data).toHaveProperty('exported_issues');
-      expect((result as any).data).toHaveProperty('success_count', 1);
-      expect((result as any).data).toHaveProperty('error_count', 0);
-      expect((result as any).data.exported_issues[0]).toHaveProperty('jira_issue_key', 'PROJ-101');
+      const parsedData = JSON.parse((result as any).content[0].text);
+      expect(parsedData.data).toHaveProperty('exported_issues');
+      expect(parsedData.data).toHaveProperty('success_count', 1);
+      expect(parsedData.data).toHaveProperty('error_count', 0);
+      expect(parsedData.data.exported_issues[0]).toHaveProperty('jira_issue_key', 'PROJ-101');
     });
 
     it('should handle empty export results', async () => {
@@ -511,11 +548,17 @@ describe('ExportToJiraTool', () => {
       });
 
       expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: apiResponse,
+          }, null, 2),
+        }],
       });
-      expect((result as any).data.exported_issues).toHaveLength(0);
-      expect((result as any).data.error_count).toBe(1);
+      const parsedData = JSON.parse((result as any).content[0].text);
+      expect(parsedData.data.exported_issues).toHaveLength(0);
+      expect(parsedData.data.error_count).toBe(1);
     });
   });
 });

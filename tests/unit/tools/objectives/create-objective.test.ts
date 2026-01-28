@@ -141,7 +141,15 @@ describe('CreateObjectiveTool', () => {
       const result = await tool.execute(validInput);
 
       expect(mockClient.post).toHaveBeenCalledWith('/objectives', validInput);
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -166,7 +174,15 @@ describe('CreateObjectiveTool', () => {
       const result = await tool.execute(minimalInput);
 
       expect(mockClient.post).toHaveBeenCalledWith('/objectives', minimalInput);
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -181,8 +197,16 @@ describe('CreateObjectiveTool', () => {
       mockClient.post.mockRejectedValueOnce(new Error('API Error'));
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'Failed to create objective: API Error',
       });
@@ -207,8 +231,16 @@ describe('CreateObjectiveTool', () => {
       mockClient.post.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'Failed to create objective: Authentication failed',
       });
@@ -238,8 +270,16 @@ describe('CreateObjectiveTool', () => {
       mockClient.post.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'Failed to create objective: Validation error',
       });
@@ -252,8 +292,16 @@ describe('CreateObjectiveTool', () => {
         description: 'Improve user engagement metrics for Q2',
       };
       const result = await uninitializedTool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: expect.stringContaining('Failed to create objective:'),
       });
@@ -278,13 +326,21 @@ describe('CreateObjectiveTool', () => {
         description: 'Test Description',
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: apiResponse,
       });
-      expect((result as any).data).toHaveProperty('id', 'obj_123');
-      expect((result as any).data).toHaveProperty('name', 'Test Objective');
-      expect((result as any).data).toHaveProperty('created_at');
+      expect(response.data).toHaveProperty('id', 'obj_123');
+      expect(response.data).toHaveProperty('name', 'Test Objective');
+      expect(response.data).toHaveProperty('created_at');
     });
   });
 });

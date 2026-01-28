@@ -114,8 +114,13 @@ describe('CreateReleaseTool', () => {
 
       expect(mockClient.post).toHaveBeenCalledWith('/releases', validInput);
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
     });
 
@@ -139,8 +144,13 @@ describe('CreateReleaseTool', () => {
 
       expect(mockClient.post).toHaveBeenCalledWith('/releases', minimalInput);
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
     });
 
@@ -153,10 +163,15 @@ describe('CreateReleaseTool', () => {
       mockClient.post.mockRejectedValueOnce(new Error('API Error'));
 
       const result = await tool.execute(validInput);
-      
+
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to create release: API Error',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to create release: API Error',
+          }, null, 2),
+        }],
       });
     });
 
@@ -179,10 +194,15 @@ describe('CreateReleaseTool', () => {
       mockClient.post.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
+
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to create release: Authentication failed',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to create release: Authentication failed',
+          }, null, 2),
+        }],
       });
     });
 
@@ -210,10 +230,15 @@ describe('CreateReleaseTool', () => {
       mockClient.post.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
+
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to create release: Validation error',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to create release: Validation error',
+          }, null, 2),
+        }],
       });
     });
 
@@ -224,11 +249,10 @@ describe('CreateReleaseTool', () => {
         date: '2024-01-15',
       };
       const result = await uninitializedTool.execute(validInput);
-      
-      expect(result).toEqual({
-        success: false,
-        error: expect.stringContaining('Failed to create release:'),
-      });
+
+      const parsedResult = JSON.parse((result as any).content[0].text);
+      expect(parsedResult).toHaveProperty('success', false);
+      expect(parsedResult.error).toContain('Failed to create release:');
     });
   });
 
@@ -251,12 +275,19 @@ describe('CreateReleaseTool', () => {
       });
 
       expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: apiResponse,
+          }, null, 2),
+        }],
       });
-      expect((result as any).data).toHaveProperty('id', 'rel_123');
-      expect((result as any).data).toHaveProperty('name', 'v1.0.0');
-      expect((result as any).data).toHaveProperty('date', '2024-01-15');
+      const parsedResponse = JSON.parse((result as any).content[0].text);
+      expect(parsedResponse).toHaveProperty('success', true);
+      expect(parsedResponse.data).toHaveProperty('id', 'rel_123');
+      expect(parsedResponse.data).toHaveProperty('name', 'v1.0.0');
+      expect(parsedResponse.data).toHaveProperty('date', '2024-01-15');
     });
   });
 });

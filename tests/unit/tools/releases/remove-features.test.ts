@@ -137,8 +137,13 @@ describe('RemoveFeaturesFromReleaseTool', () => {
         },
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
     });
 
@@ -171,8 +176,13 @@ describe('RemoveFeaturesFromReleaseTool', () => {
         },
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
     });
 
@@ -185,10 +195,15 @@ describe('RemoveFeaturesFromReleaseTool', () => {
       mockClient.makeRequest.mockRejectedValueOnce(new Error('API Error'));
 
       const result = await tool.execute(validInput);
-      
+
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to remove features from release: API Error',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to remove features from release: API Error',
+          }, null, 2),
+        }],
       });
     });
 
@@ -211,10 +226,15 @@ describe('RemoveFeaturesFromReleaseTool', () => {
       mockClient.makeRequest.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
+
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to remove features from release: Authentication failed',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to remove features from release: Authentication failed',
+          }, null, 2),
+        }],
       });
     });
 
@@ -240,10 +260,15 @@ describe('RemoveFeaturesFromReleaseTool', () => {
       mockClient.makeRequest.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
+
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to remove features from release: Validation error',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to remove features from release: Validation error',
+          }, null, 2),
+        }],
       });
     });
 
@@ -252,7 +277,7 @@ describe('RemoveFeaturesFromReleaseTool', () => {
         release_id: 'rel_nonexistent',
         feature_ids: ['feat_123'],
       };
-      
+
       const error = new Error('Not found');
       (error as any).response = {
         status: 404,
@@ -266,10 +291,15 @@ describe('RemoveFeaturesFromReleaseTool', () => {
       mockClient.makeRequest.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
+
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to remove features from release: Not found',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to remove features from release: Not found',
+          }, null, 2),
+        }],
       });
     });
 
@@ -278,7 +308,7 @@ describe('RemoveFeaturesFromReleaseTool', () => {
         release_id: 'rel_123',
         feature_ids: ['feat_123', 'feat_456'],
       };
-      
+
       const error = new Error('Not found');
       (error as any).response = {
         status: 404,
@@ -294,10 +324,15 @@ describe('RemoveFeaturesFromReleaseTool', () => {
       mockClient.makeRequest.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
+
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to remove features from release: Not found',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to remove features from release: Not found',
+          }, null, 2),
+        }],
       });
     });
 
@@ -308,11 +343,10 @@ describe('RemoveFeaturesFromReleaseTool', () => {
         feature_ids: ['feat_123'],
       };
       const result = await uninitializedTool.execute(validInput);
-      
-      expect(result).toEqual({
-        success: false,
-        error: expect.stringContaining('Failed to remove features from release:'),
-      });
+
+      const parsedResult = JSON.parse((result as any).content[0].text);
+      expect(parsedResult).toHaveProperty('success', false);
+      expect(parsedResult.error).toContain('Failed to remove features from release:');
     });
   });
 
@@ -338,12 +372,19 @@ describe('RemoveFeaturesFromReleaseTool', () => {
       });
 
       expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: apiResponse,
+          }, null, 2),
+        }],
       });
-      expect((result as any).data).toHaveProperty('removed_features');
-      expect((result as any).data).toHaveProperty('release_id', 'rel_123');
-      expect((result as any).data.removed_features[0]).toHaveProperty('id', 'feat_123');
+      const parsedResponse = JSON.parse((result as any).content[0].text);
+      expect(parsedResponse).toHaveProperty('success', true);
+      expect(parsedResponse.data).toHaveProperty('removed_features');
+      expect(parsedResponse.data).toHaveProperty('release_id', 'rel_123');
+      expect(parsedResponse.data.removed_features[0]).toHaveProperty('id', 'feat_123');
     });
   });
 });

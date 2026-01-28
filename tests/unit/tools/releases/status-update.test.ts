@@ -121,8 +121,13 @@ describe('ReleaseStatusUpdateTool', () => {
         actual_date: undefined,
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
     });
 
@@ -149,8 +154,13 @@ describe('ReleaseStatusUpdateTool', () => {
         actual_date: undefined,
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
     });
 
@@ -179,8 +189,13 @@ describe('ReleaseStatusUpdateTool', () => {
         actual_date: '2024-01-20',
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
     });
 
@@ -193,8 +208,13 @@ describe('ReleaseStatusUpdateTool', () => {
       const result = await tool.execute(input);
 
       expect(result).toEqual({
-        success: false,
-        error: 'Release notes are required when status is "released"',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Release notes are required when status is "released"',
+          }, null, 2),
+        }],
       });
     });
 
@@ -208,8 +228,13 @@ describe('ReleaseStatusUpdateTool', () => {
       const result = await tool.execute(input);
 
       expect(result).toEqual({
-        success: false,
-        error: 'Release notes are required when status is "released"',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Release notes are required when status is "released"',
+          }, null, 2),
+        }],
       });
     });
 
@@ -222,10 +247,15 @@ describe('ReleaseStatusUpdateTool', () => {
       mockClient.patch.mockRejectedValueOnce(new Error('API Error'));
 
       const result = await tool.execute(validInput);
-      
+
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to update release status: API Error',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to update release status: API Error',
+          }, null, 2),
+        }],
       });
     });
 
@@ -248,10 +278,15 @@ describe('ReleaseStatusUpdateTool', () => {
       mockClient.patch.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
+
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to update release status: Authentication failed',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to update release status: Authentication failed',
+          }, null, 2),
+        }],
       });
     });
 
@@ -279,10 +314,15 @@ describe('ReleaseStatusUpdateTool', () => {
       mockClient.patch.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
+
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to update release status: Validation error',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to update release status: Validation error',
+          }, null, 2),
+        }],
       });
     });
 
@@ -305,10 +345,15 @@ describe('ReleaseStatusUpdateTool', () => {
       mockClient.patch.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
+
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to update release status: Not found',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to update release status: Not found',
+          }, null, 2),
+        }],
       });
     });
 
@@ -319,11 +364,10 @@ describe('ReleaseStatusUpdateTool', () => {
         status: 'in_progress' as const,
       };
       const result = await uninitializedTool.execute(validInput);
-      
-      expect(result).toEqual({
-        success: false,
-        error: expect.stringContaining('Failed to update release status:'),
-      });
+
+      const parsedResult = JSON.parse((result as any).content[0].text);
+      expect(parsedResult).toHaveProperty('success', false);
+      expect(parsedResult.error).toContain('Failed to update release status:');
     });
   });
 
@@ -346,13 +390,20 @@ describe('ReleaseStatusUpdateTool', () => {
       });
 
       expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: apiResponse,
+          }, null, 2),
+        }],
       });
-      expect((result as any).data).toHaveProperty('id', 'rel_123');
-      expect((result as any).data).toHaveProperty('status', 'released');
-      expect((result as any).data).toHaveProperty('release_notes');
-      expect((result as any).data).toHaveProperty('updated_at');
+      const parsedResponse = JSON.parse((result as any).content[0].text);
+      expect(parsedResponse).toHaveProperty('success', true);
+      expect(parsedResponse.data).toHaveProperty('id', 'rel_123');
+      expect(parsedResponse.data).toHaveProperty('status', 'released');
+      expect(parsedResponse.data).toHaveProperty('release_notes');
+      expect(parsedResponse.data).toHaveProperty('updated_at');
     });
   });
 });

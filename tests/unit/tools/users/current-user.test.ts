@@ -25,7 +25,7 @@ describe('CurrentUserTool', () => {
   describe('constructor', () => {
     it('should initialize with correct name and description', () => {
       expect(tool.name).toBe('pb_user_current');
-      expect(tool.description).toBe('Get information about the authenticated user');
+      expect(tool.description).toBe('Get current authenticated user information from API token');
     });
 
     it('should define correct parameters schema', () => {
@@ -37,117 +37,107 @@ describe('CurrentUserTool', () => {
   });
 
   describe('execute', () => {
-    const mockCurrentUser = {
-      id: 'current-user',
-      email: 'current@example.com',
-      name: 'Current User',
-      role: 'contributor',
-      active: true,
-      permissions: [
-        'features.read',
-        'features.write',
-        'notes.read',
-        'notes.write',
-      ],
-      workspace: {
-        id: 'workspace-1',
-        name: 'My Workspace',
-        plan: 'pro',
-      },
-    };
+    const mockJwtToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiY3VycmVudC11c2VyIiwicm9sZSI6ImNvbnRyaWJ1dG9yIiwic3BhY2VfaWQiOiJ3b3Jrc3BhY2UtMSIsInJlZ2lvbiI6InVzIiwiaXNzIjoicHJvZHVjdGJvYXJkIiwiaWF0IjoxNjQwOTk1MjAwfQ.test';
 
-    it('should get current user information successfully', async () => {
-      mockApiClient.makeRequest.mockResolvedValue({
-        data: mockCurrentUser,
-        links: {},
-      });
+    beforeEach(() => {
+      // Mock the authManager to return our test token
+      (mockApiClient as any).authManager = {
+        getAuthHeaders: jest.fn().mockReturnValue({
+          Authorization: `Bearer ${mockJwtToken}`,
+        }),
+      };
+    });
 
+    it('should get current user information from JWT token successfully', async () => {
       const result = await tool.execute({});
 
-      expect(mockApiClient.makeRequest).toHaveBeenCalledWith({
-        method: 'GET',
-        endpoint: '/users/me',
-      });
+      const parsedResult = JSON.parse((result as any).content[0].text);
 
-      expect(result).toEqual({
+      expect(parsedResult).toEqual({
         success: true,
-        data: mockCurrentUser,
+        data: {
+          id: 'current-user',
+          role: 'contributor',
+          spaceId: 'workspace-1',
+          region: 'us',
+          authenticated: true,
+          tokenIssuer: 'productboard',
+          tokenIssuedAt: '2022-01-01T00:00:00.000Z',
+          note: 'User information extracted from API token. Productboard API does not provide a /me endpoint.',
+        },
       });
 
       expect(mockLogger.info).toHaveBeenCalledWith('Getting current user information');
     });
 
-    it('should handle user with minimal information', async () => {
-      const minimalUser = {
-        id: 'user-minimal',
-        email: 'minimal@example.com',
-        role: 'viewer',
-        active: true,
-      };
-
-      mockApiClient.makeRequest.mockResolvedValue({
-        data: minimalUser,
-        links: {},
-      });
-
+    it('should return MCP formatted response', async () => {
       const result = await tool.execute({});
 
-      expect(result).toEqual({
-        success: true,
-        data: minimalUser,
+      expect(result).toHaveProperty('content');
+      expect((result as any).content).toBeInstanceOf(Array);
+      expect((result as any).content[0]).toMatchObject({
+        type: 'text',
+        text: expect.any(String),
       });
     });
 
-    it('should handle authentication errors', async () => {
-      mockApiClient.makeRequest.mockRejectedValue(
-        new Error('Authentication token invalid')
-      );
+    it('should handle missing authentication token', async () => {
+      (mockApiClient as any).authManager = {
+        getAuthHeaders: jest.fn().mockReturnValue({}),
+      };
 
-      await expect(tool.execute({})).rejects.toThrow('Authentication token invalid');
+      const result = await tool.execute({});
+      const parsedResult = JSON.parse((result as any).content[0].text);
+
+      expect(parsedResult).toEqual({
+        success: false,
+        error: 'No authentication token available',
+      });
     });
 
-    it('should handle expired token errors', async () => {
-      mockApiClient.makeRequest.mockRejectedValue(
-        new Error('Token expired')
-      );
+    it('should handle invalid token format', async () => {
+      (mockApiClient as any).authManager = {
+        getAuthHeaders: jest.fn().mockReturnValue({
+          Authorization: 'Bearer invalid-token',
+        }),
+      };
 
-      await expect(tool.execute({})).rejects.toThrow('Token expired');
+      const result = await tool.execute({});
+      const parsedResult = JSON.parse((result as any).content[0].text);
+
+      expect(parsedResult).toEqual({
+        success: false,
+        error: 'Invalid token format',
+      });
     });
 
-    it('should handle network errors', async () => {
-      mockApiClient.makeRequest.mockRejectedValue(
-        new Error('Network error')
-      );
+    it('should handle malformed JWT token', async () => {
+      (mockApiClient as any).authManager = {
+        getAuthHeaders: jest.fn().mockReturnValue({
+          Authorization: 'Bearer a.b.c',
+        }),
+      };
 
-      await expect(tool.execute({})).rejects.toThrow('Network error');
+      const result = await tool.execute({});
+      const parsedResult = JSON.parse((result as any).content[0].text);
+
+      expect(parsedResult.success).toBe(false);
+      expect(parsedResult.error).toBe('Unable to extract user information from token');
     });
 
     it('should accept empty parameters object', async () => {
-      mockApiClient.makeRequest.mockResolvedValue({
-        data: mockCurrentUser,
-        links: {},
-      });
-
       const result = await tool.execute({});
+      const parsedResult = JSON.parse((result as any).content[0].text);
 
-      expect((result as any).success).toBe(true);
+      expect(parsedResult.success).toBe(true);
     });
 
     it('should ignore any passed parameters', async () => {
-      mockApiClient.makeRequest.mockResolvedValue({
-        data: mockCurrentUser,
-        links: {},
-      });
-
       // Even if we pass parameters, they should be ignored
       const result = await tool.execute({ someParam: 'value' } as any);
+      const parsedResult = JSON.parse((result as any).content[0].text);
 
-      expect(mockApiClient.makeRequest).toHaveBeenCalledWith({
-        method: 'GET',
-        endpoint: '/users/me',
-      });
-
-      expect((result as any).success).toBe(true);
+      expect(parsedResult.success).toBe(true);
     });
   });
 });

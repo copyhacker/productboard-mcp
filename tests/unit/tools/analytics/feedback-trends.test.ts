@@ -179,8 +179,15 @@ describe('FeedbackTrendsTool', () => {
         params: {},
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: expectedResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -253,8 +260,15 @@ describe('FeedbackTrendsTool', () => {
         },
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: expectedResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -265,8 +279,15 @@ describe('FeedbackTrendsTool', () => {
       const result = await tool.execute({});
       
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to analyze feedback trends: API Error',
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: false,
+              error: 'Failed to analyze feedback trends: API Error',
+            }, null, 2),
+          },
+        ],
       });
       expect(mockLogger.error).toHaveBeenCalledWith('Failed to analyze feedback trends', error);
     });
@@ -286,8 +307,15 @@ describe('FeedbackTrendsTool', () => {
       const result = await tool.execute({});
       
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to analyze feedback trends: Authentication failed',
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: false,
+              error: 'Failed to analyze feedback trends: Authentication failed',
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -306,8 +334,15 @@ describe('FeedbackTrendsTool', () => {
       const result = await tool.execute({});
       
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to analyze feedback trends: Insufficient permissions',
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: false,
+              error: 'Failed to analyze feedback trends: Insufficient permissions',
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -316,8 +351,12 @@ describe('FeedbackTrendsTool', () => {
       const result = await uninitializedTool.execute({});
       
       expect(result).toEqual({
-        success: false,
-        error: expect.stringContaining('Failed to analyze feedback trends:'),
+        content: [
+          {
+            type: 'text',
+            text: expect.stringContaining('Failed to analyze feedback trends:'),
+          },
+        ],
       });
     });
 
@@ -341,8 +380,15 @@ describe('FeedbackTrendsTool', () => {
         params: {},
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: expectedResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -413,14 +459,22 @@ describe('FeedbackTrendsTool', () => {
       });
 
       expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: apiResponse,
+            }, null, 2),
+          },
+        ],
       });
-      expect((result as any).data).toHaveProperty('summary');
-      expect((result as any).data).toHaveProperty('trends');
-      expect((result as any).data.summary).toHaveProperty('total_feedback', 200);
-      expect((result as any).data.trends[0]).toHaveProperty('period', '2024-01');
-      expect((result as any).data.trends[0]).toHaveProperty('count', 50);
+      const parsedContent = JSON.parse((result as any).content[0].text);
+      expect(parsedContent.data).toHaveProperty('summary');
+      expect(parsedContent.data).toHaveProperty('trends');
+      expect(parsedContent.data.summary).toHaveProperty('total_feedback', 200);
+      expect(parsedContent.data.trends[0]).toHaveProperty('period', '2024-01');
+      expect(parsedContent.data.trends[0]).toHaveProperty('count', 50);
     });
 
     it('should handle minimal response structure', async () => {
@@ -436,8 +490,15 @@ describe('FeedbackTrendsTool', () => {
       const result = await tool.execute({});
 
       expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: apiResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -472,11 +533,19 @@ describe('FeedbackTrendsTool', () => {
       });
 
       expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: apiResponse,
+            }, null, 2),
+          },
+        ],
       });
-      expect((result as any).data.trends[0]).toHaveProperty('top_keywords');
-      expect((result as any).data.trends[0]).toHaveProperty('sentiment_distribution');
+      const parsedContent = JSON.parse((result as any).content[0].text);
+      expect(parsedContent.data.trends[0]).toHaveProperty('top_keywords');
+      expect(parsedContent.data.trends[0]).toHaveProperty('sentiment_distribution');
     });
   });
 });

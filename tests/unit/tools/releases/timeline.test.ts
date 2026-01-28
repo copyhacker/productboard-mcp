@@ -143,8 +143,13 @@ describe('ReleaseTimelineTool', () => {
         params: {},
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
     });
 
@@ -189,8 +194,13 @@ describe('ReleaseTimelineTool', () => {
         },
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
     });
 
@@ -235,8 +245,13 @@ describe('ReleaseTimelineTool', () => {
         },
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
     });
 
@@ -259,8 +274,13 @@ describe('ReleaseTimelineTool', () => {
       const result = await tool.execute(input);
 
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
     });
 
@@ -268,10 +288,15 @@ describe('ReleaseTimelineTool', () => {
       mockClient.makeRequest.mockRejectedValueOnce(new Error('API Error'));
 
       const result = await tool.execute({});
-      
+
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to get release timeline: API Error',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to get release timeline: API Error',
+          }, null, 2),
+        }],
       });
     });
 
@@ -289,10 +314,15 @@ describe('ReleaseTimelineTool', () => {
       mockClient.makeRequest.mockRejectedValueOnce(error);
 
       const result = await tool.execute({});
-      
+
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to get release timeline: Authentication failed',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to get release timeline: Authentication failed',
+          }, null, 2),
+        }],
       });
     });
 
@@ -319,10 +349,15 @@ describe('ReleaseTimelineTool', () => {
       mockClient.makeRequest.mockRejectedValueOnce(error);
 
       const result = await tool.execute(input);
-      
+
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to get release timeline: Validation error',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to get release timeline: Validation error',
+          }, null, 2),
+        }],
       });
     });
 
@@ -344,21 +379,25 @@ describe('ReleaseTimelineTool', () => {
       mockClient.makeRequest.mockRejectedValueOnce(error);
 
       const result = await tool.execute(input);
-      
+
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to get release timeline: Not found',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to get release timeline: Not found',
+          }, null, 2),
+        }],
       });
     });
 
     it('should throw error if client not initialized', async () => {
       const uninitializedTool = new ReleaseTimelineTool(null as any, mockLogger);
       const result = await uninitializedTool.execute({});
-      
-      expect(result).toEqual({
-        success: false,
-        error: expect.stringContaining('Failed to get release timeline:'),
-      });
+
+      const parsedResult = JSON.parse((result as any).content[0].text);
+      expect(parsedResult).toHaveProperty('success', false);
+      expect(parsedResult.error).toContain('Failed to get release timeline:');
     });
   });
 
@@ -391,14 +430,21 @@ describe('ReleaseTimelineTool', () => {
       const result = await tool.execute({});
 
       expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: apiResponse,
+          }, null, 2),
+        }],
       });
-      expect((result as any).data).toHaveProperty('timeline');
-      expect((result as any).data).toHaveProperty('metadata');
-      expect((result as any).data.timeline[0]).toHaveProperty('id', 'rel_123');
-      expect((result as any).data.timeline[0]).toHaveProperty('features');
-      expect((result as any).data.timeline[0].features[0]).toHaveProperty('id', 'feat_123');
+      const parsedResponse = JSON.parse((result as any).content[0].text);
+      expect(parsedResponse).toHaveProperty('success', true);
+      expect(parsedResponse.data).toHaveProperty('timeline');
+      expect(parsedResponse.data).toHaveProperty('metadata');
+      expect(parsedResponse.data.timeline[0]).toHaveProperty('id', 'rel_123');
+      expect(parsedResponse.data.timeline[0]).toHaveProperty('features');
+      expect(parsedResponse.data.timeline[0].features[0]).toHaveProperty('id', 'feat_123');
     });
   });
 });

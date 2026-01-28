@@ -29,7 +29,14 @@ describe('MCPProtocolHandler', () => {
           description: { type: 'string' },
         },
       },
-      execute: jest.fn().mockResolvedValue({ success: true, data: { id: 'feature-1' } }),
+      execute: jest.fn().mockResolvedValue({
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({ success: true, data: { id: 'feature-1' } }, null, 2)
+          }
+        ]
+      }),
     };
 
     mockToolRegistry = {
@@ -216,7 +223,14 @@ describe('MCPProtocolHandler', () => {
   describe('Tool Invocation', () => {
     it('should invoke tool successfully', async () => {
       const params = { name: 'Test Feature', description: 'A test feature' };
-      const expectedResult = { success: true, data: { id: 'feature-1' } };
+      const expectedResult = {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({ success: true, data: { id: 'feature-1' } }, null, 2)
+          }
+        ]
+      };
 
       mockTool.execute.mockResolvedValue(expectedResult);
 
@@ -226,7 +240,6 @@ describe('MCPProtocolHandler', () => {
       expect(mockTool.execute).toHaveBeenCalledWith(params);
       expect(result).toEqual(expectedResult);
       expect(mockLogger.debug).toHaveBeenCalledWith('Invoking tool: pb_feature_create', { params });
-      expect(mockLogger.debug).toHaveBeenCalledWith('Tool pb_feature_create completed successfully');
     });
 
     it('should throw ProtocolError for non-existent tool', async () => {
@@ -260,7 +273,14 @@ describe('MCPProtocolHandler', () => {
 
   describe('Response Creation', () => {
     it('should create success response', () => {
-      const result = { success: true, data: { id: 'feature-1' } };
+      const result = {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({ success: true, data: { id: 'feature-1' } }, null, 2)
+          }
+        ]
+      };
 
       const response = protocolHandler.createSuccessResponse('1', result);
 
@@ -316,11 +336,19 @@ describe('MCPProtocolHandler', () => {
     });
 
     it('should handle numeric request IDs', () => {
-      const result = { success: true };
+      const result = {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({ success: true }, null, 2)
+          }
+        ]
+      };
 
       const response = protocolHandler.createSuccessResponse(123, result);
 
       expect(response.id).toBe(123);
+      expect(response.result).toEqual(result);
     });
   });
 
@@ -406,10 +434,20 @@ describe('MCPProtocolHandler', () => {
       const params2 = { name: 'Feature 2' };
       const params3 = { name: 'Feature 3' };
 
+      const result1 = {
+        content: [{ type: 'text', text: JSON.stringify({ id: 'feature-1' }, null, 2) }]
+      };
+      const result2 = {
+        content: [{ type: 'text', text: JSON.stringify({ id: 'feature-2' }, null, 2) }]
+      };
+      const result3 = {
+        content: [{ type: 'text', text: JSON.stringify({ id: 'feature-3' }, null, 2) }]
+      };
+
       mockTool.execute
-        .mockResolvedValueOnce({ id: 'feature-1' })
-        .mockResolvedValueOnce({ id: 'feature-2' })
-        .mockResolvedValueOnce({ id: 'feature-3' });
+        .mockResolvedValueOnce(result1)
+        .mockResolvedValueOnce(result2)
+        .mockResolvedValueOnce(result3);
 
       const promises = [
         protocolHandler.invokeTool('pb_feature_create', params1),
@@ -420,9 +458,9 @@ describe('MCPProtocolHandler', () => {
       const results = await Promise.all(promises);
 
       expect(results).toHaveLength(3);
-      expect(results[0]).toEqual({ id: 'feature-1' });
-      expect(results[1]).toEqual({ id: 'feature-2' });
-      expect(results[2]).toEqual({ id: 'feature-3' });
+      expect(results[0]).toEqual(result1);
+      expect(results[1]).toEqual(result2);
+      expect(results[2]).toEqual(result3);
     });
   });
 
@@ -465,7 +503,9 @@ describe('MCPProtocolHandler', () => {
       await protocolHandler.invokeTool('pb_feature_create', params);
 
       expect(mockLogger.debug).toHaveBeenCalledWith('Invoking tool: pb_feature_create', { params });
-      expect(mockLogger.debug).toHaveBeenCalledWith('Tool pb_feature_create completed successfully');
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'Tool pb_feature_create completed. Result type: object, has content: true'
+      );
     });
 
     it('should log tool execution failures', async () => {

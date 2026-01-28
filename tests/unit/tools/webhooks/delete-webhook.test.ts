@@ -98,7 +98,15 @@ describe('DeleteWebhookTool', () => {
       const result = await tool.execute(validInput);
 
       expect(mockClient.delete).toHaveBeenCalledWith('/webhooks/webhook_123456');
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: {
           message: 'Webhook deleted successfully',
@@ -118,7 +126,15 @@ describe('DeleteWebhookTool', () => {
 
       expect(mockLogger.info).toHaveBeenCalledWith('Deleting webhook', { id: 'webhook_abc789' });
       expect(mockClient.delete).toHaveBeenCalledWith('/webhooks/webhook_abc789');
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: {
           message: 'Webhook deleted successfully',
@@ -135,8 +151,16 @@ describe('DeleteWebhookTool', () => {
       mockClient.delete.mockRejectedValueOnce(new Error('API Error'));
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: 'Failed to delete webhook: API Error',
       });
@@ -160,8 +184,16 @@ describe('DeleteWebhookTool', () => {
       mockClient.delete.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: 'Failed to delete webhook: Webhook not found',
       });
@@ -185,8 +217,16 @@ describe('DeleteWebhookTool', () => {
       mockClient.delete.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: 'Failed to delete webhook: Authentication failed',
       });
@@ -210,8 +250,16 @@ describe('DeleteWebhookTool', () => {
       mockClient.delete.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: 'Failed to delete webhook: Admin access required',
       });
@@ -237,8 +285,16 @@ describe('DeleteWebhookTool', () => {
       mockClient.delete.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: 'Failed to delete webhook: Webhook is currently in use',
       });
@@ -262,8 +318,16 @@ describe('DeleteWebhookTool', () => {
       mockClient.delete.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: 'Failed to delete webhook: Internal server error',
       });
@@ -278,8 +342,16 @@ describe('DeleteWebhookTool', () => {
       mockClient.delete.mockRejectedValueOnce(networkError);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: 'Failed to delete webhook: Network timeout',
       });
@@ -291,8 +363,16 @@ describe('DeleteWebhookTool', () => {
         id: 'webhook_123456',
       };
       const result = await uninitializedTool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: expect.stringContaining('Failed to delete webhook:'),
       });
@@ -312,7 +392,15 @@ describe('DeleteWebhookTool', () => {
         const result = await tool.execute({ id });
 
         expect(mockClient.delete).toHaveBeenCalledWith(`/webhooks/${id}`);
-        expect(result).toEqual({
+        expect(result).toMatchObject({
+          content: expect.arrayContaining([
+            expect.objectContaining({
+              type: 'text'
+            })
+          ])
+        });
+        const resultData = JSON.parse((result as any).content[0].text);
+        expect(resultData).toEqual({
           success: true,
           data: {
             message: 'Webhook deleted successfully',
@@ -333,15 +421,23 @@ describe('DeleteWebhookTool', () => {
         id: 'webhook_123',
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: {
           message: 'Webhook deleted successfully',
           id: 'webhook_123',
         },
       });
-      expect((result as any).data).toHaveProperty('message');
-      expect((result as any).data).toHaveProperty('id', 'webhook_123');
+      expect(resultData.data).toHaveProperty('message');
+      expect(resultData.data).toHaveProperty('id', 'webhook_123');
     });
 
     it('should handle successful deletion without response data', async () => {
@@ -352,7 +448,15 @@ describe('DeleteWebhookTool', () => {
         id: 'webhook_456',
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: {
           message: 'Webhook deleted successfully',
@@ -369,7 +473,15 @@ describe('DeleteWebhookTool', () => {
         id: 'webhook_789',
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: {
           message: 'Webhook deleted successfully',
@@ -386,7 +498,15 @@ describe('DeleteWebhookTool', () => {
         id: 'webhook_abc',
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: {
           message: 'Webhook deleted successfully',

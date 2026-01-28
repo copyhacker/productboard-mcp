@@ -75,11 +75,18 @@ describe('AttachNoteTool', () => {
       });
 
       expect(result).toEqual({
-        success: true,
-        data: {
-          data: mockResponse,
-          links: {},
-        },
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: {
+                data: mockResponse,
+                links: {},
+              },
+            }, null, 2),
+          },
+        ],
       });
 
       expect(mockLogger.info).toHaveBeenCalledWith(
@@ -111,7 +118,8 @@ describe('AttachNoteTool', () => {
         data: { feature_ids: ['feat-single'] },
       });
 
-      expect((result as any).data.data.total_attachments).toBe(1);
+      const parsedResult = JSON.parse((result as any).content[0].text);
+      expect(parsedResult.data.data.total_attachments).toBe(1);
     });
 
     it('should validate required parameters', async () => {
@@ -165,9 +173,10 @@ describe('AttachNoteTool', () => {
 
       const result = await tool.execute(validParams);
 
-      expect((result as any).success).toBe(true);
-      expect((result as any).data.data).toHaveProperty('already_attached');
-      expect((result as any).data.data).toHaveProperty('newly_attached');
+      const parsedResult = JSON.parse((result as any).content[0].text);
+      expect(parsedResult.success).toBe(true);
+      expect(parsedResult.data.data).toHaveProperty('already_attached');
+      expect(parsedResult.data.data).toHaveProperty('newly_attached');
     });
 
     it('should handle attachment limit error', async () => {

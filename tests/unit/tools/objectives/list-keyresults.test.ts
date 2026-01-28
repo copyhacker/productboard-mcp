@@ -145,7 +145,15 @@ describe('ListKeyResultsTool', () => {
         endpoint: '/keyresults',
         params: {},
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -191,7 +199,15 @@ describe('ListKeyResultsTool', () => {
           offset: 5,
         },
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -242,7 +258,15 @@ describe('ListKeyResultsTool', () => {
           objective_id: 'obj_123',
         },
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -284,7 +308,15 @@ describe('ListKeyResultsTool', () => {
           limit: 5,
         },
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -294,8 +326,16 @@ describe('ListKeyResultsTool', () => {
       mockClient.makeRequest.mockRejectedValueOnce(new Error('API Error'));
 
       const result = await tool.execute({});
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'Failed to list key results: API Error',
       });
@@ -315,8 +355,16 @@ describe('ListKeyResultsTool', () => {
       mockClient.makeRequest.mockRejectedValueOnce(error);
 
       const result = await tool.execute({});
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'Failed to list key results: Authentication failed',
       });
@@ -336,8 +384,16 @@ describe('ListKeyResultsTool', () => {
       mockClient.makeRequest.mockRejectedValueOnce(error);
 
       const result = await tool.execute({});
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'Failed to list key results: Insufficient permissions',
       });
@@ -346,8 +402,16 @@ describe('ListKeyResultsTool', () => {
     it('should throw error if client not initialized', async () => {
       const uninitializedTool = new ListKeyResultsTool(null as any, mockLogger);
       const result = await uninitializedTool.execute({});
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: expect.stringContaining('Failed to list key results:'),
       });
@@ -379,14 +443,22 @@ describe('ListKeyResultsTool', () => {
 
       const result = await tool.execute({});
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: apiResponse,
       });
-      expect((result as any).data).toHaveProperty('keyResults');
-      expect((result as any).data).toHaveProperty('total', 1);
-      expect((result as any).data.keyResults[0]).toHaveProperty('id', 'kr_123');
-      expect((result as any).data.keyResults[0]).toHaveProperty('progress', 0.5);
+      expect(response.data).toHaveProperty('keyResults');
+      expect(response.data).toHaveProperty('total', 1);
+      expect(response.data.keyResults[0]).toHaveProperty('id', 'kr_123');
+      expect(response.data.keyResults[0]).toHaveProperty('progress', 0.5);
     });
 
     it('should handle empty results', async () => {
@@ -401,11 +473,19 @@ describe('ListKeyResultsTool', () => {
 
       const result = await tool.execute({});
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: apiResponse,
       });
-      expect((result as any).data.keyResults).toHaveLength(0);
+      expect(response.data.keyResults).toHaveLength(0);
     });
 
     it('should handle different metric types correctly', async () => {
@@ -448,14 +528,22 @@ describe('ListKeyResultsTool', () => {
 
       const result = await tool.execute({});
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: apiResponse,
       });
-      expect((result as any).data.keyResults).toHaveLength(3);
-      expect((result as any).data.keyResults[0].metric_type).toBe('number');
-      expect((result as any).data.keyResults[1].metric_type).toBe('percentage');
-      expect((result as any).data.keyResults[2].metric_type).toBe('currency');
+      expect(response.data.keyResults).toHaveLength(3);
+      expect(response.data.keyResults[0].metric_type).toBe('number');
+      expect(response.data.keyResults[1].metric_type).toBe('percentage');
+      expect(response.data.keyResults[2].metric_type).toBe('currency');
     });
   });
 });

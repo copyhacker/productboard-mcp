@@ -171,8 +171,15 @@ describe('UserEngagementTool', () => {
         params: {},
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: expectedResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -226,8 +233,15 @@ describe('UserEngagementTool', () => {
         },
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: expectedResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -238,8 +252,15 @@ describe('UserEngagementTool', () => {
       const result = await tool.execute({});
       
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to get user engagement analytics: API Error',
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: false,
+              error: 'Failed to get user engagement analytics: API Error',
+            }, null, 2),
+          },
+        ],
       });
       expect(mockLogger.error).toHaveBeenCalledWith('Failed to get user engagement analytics', error);
     });
@@ -259,8 +280,15 @@ describe('UserEngagementTool', () => {
       const result = await tool.execute({});
       
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to get user engagement analytics: Authentication failed',
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: false,
+              error: 'Failed to get user engagement analytics: Authentication failed',
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -279,8 +307,15 @@ describe('UserEngagementTool', () => {
       const result = await tool.execute({});
       
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to get user engagement analytics: Insufficient permissions',
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: false,
+              error: 'Failed to get user engagement analytics: Insufficient permissions',
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -289,8 +324,12 @@ describe('UserEngagementTool', () => {
       const result = await uninitializedTool.execute({});
       
       expect(result).toEqual({
-        success: false,
-        error: expect.stringContaining('Failed to get user engagement analytics:'),
+        content: [
+          {
+            type: 'text',
+            text: expect.stringContaining('Failed to get user engagement analytics:'),
+          },
+        ],
       });
     });
 
@@ -314,8 +353,15 @@ describe('UserEngagementTool', () => {
         params: {},
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: expectedResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -350,8 +396,15 @@ describe('UserEngagementTool', () => {
         },
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: expectedResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
   });
@@ -404,15 +457,23 @@ describe('UserEngagementTool', () => {
       });
 
       expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: apiResponse,
+            }, null, 2),
+          },
+        ],
       });
-      expect((result as any).data).toHaveProperty('summary');
-      expect((result as any).data).toHaveProperty('users');
-      expect((result as any).data.summary).toHaveProperty('total_users', 200);
-      expect((result as any).data.users[0]).toHaveProperty('user_id', 'user_789');
-      expect((result as any).data.users[0]).toHaveProperty('engagement_metrics');
-      expect((result as any).data.users[0].engagement_metrics).toHaveProperty('logins', 35);
+      const parsedContent = JSON.parse((result as any).content[0].text);
+      expect(parsedContent.data).toHaveProperty('summary');
+      expect(parsedContent.data).toHaveProperty('users');
+      expect(parsedContent.data.summary).toHaveProperty('total_users', 200);
+      expect(parsedContent.data.users[0]).toHaveProperty('user_id', 'user_789');
+      expect(parsedContent.data.users[0]).toHaveProperty('engagement_metrics');
+      expect(parsedContent.data.users[0].engagement_metrics).toHaveProperty('logins', 35);
     });
 
     it('should handle minimal response structure', async () => {
@@ -429,8 +490,15 @@ describe('UserEngagementTool', () => {
       const result = await tool.execute({});
 
       expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: apiResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -459,11 +527,19 @@ describe('UserEngagementTool', () => {
       const result = await tool.execute({});
 
       expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: apiResponse,
+            }, null, 2),
+          },
+        ],
       });
-      expect((result as any).data).toHaveProperty('role_breakdown');
-      expect((result as any).data).toHaveProperty('engagement_distribution');
+      const parsedContent = JSON.parse((result as any).content[0].text);
+      expect(parsedContent.data).toHaveProperty('role_breakdown');
+      expect(parsedContent.data).toHaveProperty('engagement_distribution');
     });
   });
 });

@@ -82,10 +82,17 @@ describe('CreateProductTool', () => {
 
       expect(mockApiClient.post).toHaveBeenCalledWith('/products', validParams);
 
-      expect(result).toEqual({
-        success: true,
-        data: mockCreatedProduct,
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
       });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData.success).toBe(true);
+      expect(resultData.data.id).toBe('prod-new');
+      expect(resultData.data.name).toBe('New Product');
 
       expect(mockLogger.info).toHaveBeenCalledWith(
         'Creating product',
@@ -110,7 +117,16 @@ describe('CreateProductTool', () => {
 
       expect(mockApiClient.post).toHaveBeenCalledWith('/products', subProductParams);
 
-      expect((result as any).data.parent_id).toBe('prod-parent');
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData.success).toBe(true);
+      expect(resultData.data.parent_id).toBe('prod-parent');
     });
 
     it('should create a product with owner email', async () => {
@@ -130,7 +146,16 @@ describe('CreateProductTool', () => {
 
       expect(mockApiClient.post).toHaveBeenCalledWith('/products', paramsWithOwner);
 
-      expect((result as any).data.owner_email).toBe('owner@example.com');
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData.success).toBe(true);
+      expect(resultData.data.owner_email).toBe('owner@example.com');
     });
 
     it('should validate required name parameter', async () => {

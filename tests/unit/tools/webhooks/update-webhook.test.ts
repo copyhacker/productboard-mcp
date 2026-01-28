@@ -180,7 +180,15 @@ describe('UpdateWebhookTool', () => {
         events: ['feature.created', 'feature.updated'],
         active: true,
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -208,7 +216,15 @@ describe('UpdateWebhookTool', () => {
       expect(mockClient.put).toHaveBeenCalledWith('/webhooks/webhook_123', {
         name: 'New Name',
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -236,7 +252,15 @@ describe('UpdateWebhookTool', () => {
       expect(mockClient.put).toHaveBeenCalledWith('/webhooks/webhook_123', {
         url: 'https://new-endpoint.example.com/webhook',
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -264,7 +288,15 @@ describe('UpdateWebhookTool', () => {
       expect(mockClient.put).toHaveBeenCalledWith('/webhooks/webhook_123', {
         events: ['note.created', 'note.updated', 'user.created'],
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -293,7 +325,15 @@ describe('UpdateWebhookTool', () => {
       expect(mockClient.put).toHaveBeenCalledWith('/webhooks/webhook_123', {
         secret: 'new_secret_key_456',
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -321,7 +361,15 @@ describe('UpdateWebhookTool', () => {
       expect(mockClient.put).toHaveBeenCalledWith('/webhooks/webhook_123', {
         active: false,
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -349,7 +397,15 @@ describe('UpdateWebhookTool', () => {
       expect(mockClient.put).toHaveBeenCalledWith('/webhooks/webhook_123', {
         active: true,
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -377,7 +433,15 @@ describe('UpdateWebhookTool', () => {
       expect(mockClient.put).toHaveBeenCalledWith('/webhooks/webhook_123', {
         events: [],
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -390,7 +454,15 @@ describe('UpdateWebhookTool', () => {
 
       const result = await tool.execute(input);
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: 'No update fields provided',
       });
@@ -406,8 +478,16 @@ describe('UpdateWebhookTool', () => {
       mockClient.put.mockRejectedValueOnce(new Error('API Error'));
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: 'Failed to update webhook: API Error',
       });
@@ -432,8 +512,16 @@ describe('UpdateWebhookTool', () => {
       mockClient.put.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: 'Failed to update webhook: Webhook not found',
       });
@@ -458,8 +546,16 @@ describe('UpdateWebhookTool', () => {
       mockClient.put.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: 'Failed to update webhook: Authentication failed',
       });
@@ -484,8 +580,16 @@ describe('UpdateWebhookTool', () => {
       mockClient.put.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: 'Failed to update webhook: Admin access required',
       });
@@ -514,8 +618,16 @@ describe('UpdateWebhookTool', () => {
       mockClient.put.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: 'Failed to update webhook: Validation error',
       });
@@ -528,8 +640,16 @@ describe('UpdateWebhookTool', () => {
         name: 'Updated Webhook',
       };
       const result = await uninitializedTool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: expect.stringContaining('Failed to update webhook:'),
       });
@@ -555,13 +675,21 @@ describe('UpdateWebhookTool', () => {
         name: 'Updated Webhook',
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: apiResponse,
       });
-      expect((result as any).data).toHaveProperty('id', 'webhook_123');
-      expect((result as any).data).toHaveProperty('name', 'Updated Webhook');
-      expect((result as any).data).toHaveProperty('updated_at');
+      expect(resultData.data).toHaveProperty('id', 'webhook_123');
+      expect(resultData.data).toHaveProperty('name', 'Updated Webhook');
+      expect(resultData.data).toHaveProperty('updated_at');
     });
 
     it('should handle response with masked secret', async () => {
@@ -583,11 +711,19 @@ describe('UpdateWebhookTool', () => {
         secret: 'new_secret_key',
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: apiResponse,
       });
-      expect((result as any).data).toHaveProperty('secret', '***masked***');
+      expect(resultData.data).toHaveProperty('secret', '***masked***');
     });
 
     it('should handle response with empty events array', async () => {
@@ -608,11 +744,19 @@ describe('UpdateWebhookTool', () => {
         events: [],
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: apiResponse,
       });
-      expect((result as any).data.events).toHaveLength(0);
+      expect(resultData.data.events).toHaveLength(0);
     });
   });
 });

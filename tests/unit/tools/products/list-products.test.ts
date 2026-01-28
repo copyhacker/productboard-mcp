@@ -83,13 +83,17 @@ describe('ListProductsTool', () => {
         params: {},
       });
 
-      expect(result).toEqual({
-        success: true,
-        data: {
-          products: mockProducts,
-          total: 2,
-        },
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
       });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData.success).toBe(true);
+      expect(resultData.data.products).toHaveLength(2);
+      expect(resultData.data.total).toBe(2);
 
       expect(mockLogger.info).toHaveBeenCalledWith('Listing products');
     });
@@ -117,7 +121,17 @@ describe('ListProductsTool', () => {
         params: { parent_id: 'prod-1' },
       });
 
-      expect((result as any).data.products).toEqual(subProducts);
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData.success).toBe(true);
+      expect(resultData.data.products).toHaveLength(1);
+      expect(resultData.data.products[0].name).toBe('Sub Product 1');
     });
 
     it('should include components when requested', async () => {
@@ -141,7 +155,17 @@ describe('ListProductsTool', () => {
         params: { include_components: true },
       });
 
-      expect((result as any).data.products[0]).toHaveProperty('components');
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData.success).toBe(true);
+      expect(resultData.data.products[0]).toHaveProperty('components');
+      expect(resultData.data.products[0].components[0].name).toBe('Component 1');
     });
 
     it('should include archived products when requested', async () => {
@@ -167,8 +191,17 @@ describe('ListProductsTool', () => {
         params: { include_archived: true },
       });
 
-      expect((result as any).data.products).toHaveLength(3);
-      expect((result as any).data.products.some((p: any) => p.archived)).toBe(true);
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData.success).toBe(true);
+      expect(resultData.data.products).toHaveLength(3);
+      expect(resultData.data.total).toBe(3);
     });
 
     it('should handle empty results', async () => {
@@ -179,13 +212,17 @@ describe('ListProductsTool', () => {
 
       const result = await tool.execute({});
 
-      expect(result).toEqual({
-        success: true,
-        data: {
-          products: [],
-          total: 0,
-        },
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
       });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData.success).toBe(true);
+      expect(resultData.data.products).toEqual([]);
+      expect(resultData.data.total).toBe(0);
     });
 
     it('should handle API errors', async () => {
@@ -193,10 +230,16 @@ describe('ListProductsTool', () => {
 
       const result = await tool.execute({});
 
-      expect(result).toEqual({
-        success: false,
-        error: 'Failed to list products: API Error',
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
       });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData.success).toBe(false);
+      expect(resultData.error).toContain('Failed to list products: API Error');
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Failed to list products',

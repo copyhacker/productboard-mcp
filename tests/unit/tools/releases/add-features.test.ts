@@ -133,8 +133,13 @@ describe('AddFeaturesToReleaseTool', () => {
         feature_ids: ['feat_123', 'feat_456', 'feat_789'],
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
     });
 
@@ -163,8 +168,13 @@ describe('AddFeaturesToReleaseTool', () => {
         feature_ids: ['feat_123'],
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
     });
 
@@ -177,10 +187,15 @@ describe('AddFeaturesToReleaseTool', () => {
       mockClient.post.mockRejectedValueOnce(new Error('API Error'));
 
       const result = await tool.execute(validInput);
-      
+
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to add features to release: API Error',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to add features to release: API Error',
+          }, null, 2),
+        }],
       });
     });
 
@@ -203,10 +218,15 @@ describe('AddFeaturesToReleaseTool', () => {
       mockClient.post.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
+
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to add features to release: Authentication failed',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to add features to release: Authentication failed',
+          }, null, 2),
+        }],
       });
     });
 
@@ -232,10 +252,15 @@ describe('AddFeaturesToReleaseTool', () => {
       mockClient.post.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
+
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to add features to release: Validation error',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to add features to release: Validation error',
+          }, null, 2),
+        }],
       });
     });
 
@@ -258,10 +283,15 @@ describe('AddFeaturesToReleaseTool', () => {
       mockClient.post.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
+
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to add features to release: Not found',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to add features to release: Not found',
+          }, null, 2),
+        }],
       });
     });
 
@@ -286,10 +316,15 @@ describe('AddFeaturesToReleaseTool', () => {
       mockClient.post.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
+
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to add features to release: Conflict',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to add features to release: Conflict',
+          }, null, 2),
+        }],
       });
     });
 
@@ -300,11 +335,10 @@ describe('AddFeaturesToReleaseTool', () => {
         feature_ids: ['feat_123'],
       };
       const result = await uninitializedTool.execute(validInput);
-      
-      expect(result).toEqual({
-        success: false,
-        error: expect.stringContaining('Failed to add features to release:'),
-      });
+
+      const parsedResult = JSON.parse((result as any).content[0].text);
+      expect(parsedResult).toHaveProperty('success', false);
+      expect(parsedResult.error).toContain('Failed to add features to release:');
     });
   });
 
@@ -330,12 +364,19 @@ describe('AddFeaturesToReleaseTool', () => {
       });
 
       expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: apiResponse,
+          }, null, 2),
+        }],
       });
-      expect((result as any).data).toHaveProperty('added_features');
-      expect((result as any).data).toHaveProperty('release_id', 'rel_123');
-      expect((result as any).data.added_features[0]).toHaveProperty('id', 'feat_123');
+      const parsedResponse = JSON.parse((result as any).content[0].text);
+      expect(parsedResponse).toHaveProperty('success', true);
+      expect(parsedResponse.data).toHaveProperty('added_features');
+      expect(parsedResponse.data).toHaveProperty('release_id', 'rel_123');
+      expect(parsedResponse.data.added_features[0]).toHaveProperty('id', 'feat_123');
     });
   });
 });

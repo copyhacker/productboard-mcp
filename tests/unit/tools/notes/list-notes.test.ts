@@ -101,19 +101,23 @@ describe('ListNotesTool', () => {
       });
 
       expect(result).toEqual({
-        success: true,
-        data: {
-          data: mockNotes,
-          links: { next: null },
-        },
+        content: [
+          {
+            type: 'text',
+            text: expect.stringContaining('Found 2 notes:'),
+          },
+        ],
       });
+
+      expect((result as any).content[0].text).toContain('First feedback');
+      expect((result as any).content[0].text).toContain('Second feedback');
 
       expect(mockLogger.info).toHaveBeenCalledWith('Listing notes');
     });
 
     it('should filter by feature_id', async () => {
       const featureNotes = [mockNotes[0]];
-      
+
       mockApiClient.makeRequest.mockResolvedValue({
         data: featureNotes,
         links: {},
@@ -127,7 +131,8 @@ describe('ListNotesTool', () => {
         params: { feature_id: 'feat-123', limit: 20 },
       });
 
-      expect((result as any).data.data).toHaveLength(1);
+      expect((result as any).content[0].text).toContain('Found 1 note');
+      expect((result as any).content[0].text).toContain('First feedback');
     });
 
     it('should filter by customer_email', async () => {
@@ -221,12 +226,16 @@ describe('ListNotesTool', () => {
       const result = await tool.execute({});
 
       expect(result).toEqual({
-        success: true,
-        data: {
-          data: mockNotes,
-          links: { next: '/notes?offset=20' },
-        },
+        content: [
+          {
+            type: 'text',
+            text: expect.stringContaining('Found 2 notes:'),
+          },
+        ],
       });
+
+      expect((result as any).content[0].text).toContain('First feedback');
+      expect((result as any).content[0].text).toContain('Second feedback');
     });
 
     it('should validate limit range', async () => {
@@ -249,11 +258,12 @@ describe('ListNotesTool', () => {
       const result = await tool.execute({});
 
       expect(result).toEqual({
-        success: true,
-        data: {
-          data: [],
-          links: {},
-        },
+        content: [
+          {
+            type: 'text',
+            text: 'No notes found.',
+          },
+        ],
       });
     });
 

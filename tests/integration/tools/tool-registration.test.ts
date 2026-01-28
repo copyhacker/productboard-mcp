@@ -153,27 +153,57 @@ describe('Tool Registration Integration', () => {
 
   describe('tool execution through registry', () => {
     it('should execute tool successfully', async () => {
-      const tool = new CurrentUserTool(mockApiClient, mockLogger);
+      // Create a JWT token for testing
+      const mockUserId = 'user-1';
+      const mockRole = 'admin';
+      const mockSpaceId = 'space-123';
+
+      // Create a simple JWT-like token (header.payload.signature)
+      const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64');
+      const payload = Buffer.from(JSON.stringify({
+        user_id: mockUserId,
+        role: mockRole,
+        space_id: mockSpaceId,
+        region: 'us',
+        iss: 'test-issuer',
+        iat: Math.floor(Date.now() / 1000),
+      })).toString('base64');
+      const signature = 'mock-signature';
+      const mockToken = `${header}.${payload}.${signature}`;
+
+      // Mock the API client with authManager
+      const mockApiClientWithAuth = {
+        ...mockApiClient,
+        authManager: {
+          getAuthHeaders: jest.fn().mockReturnValue({
+            'Authorization': `Bearer ${mockToken}`,
+          }),
+        },
+      } as any;
+
+      const tool = new CurrentUserTool(mockApiClientWithAuth, mockLogger);
       registry.registerTool(tool);
-
-      const mockUser = {
-        id: 'user-1',
-        email: 'test@example.com',
-        role: 'admin',
-      };
-
-      mockApiClient.makeRequest.mockResolvedValue({
-        data: mockUser,
-        links: {},
-      });
 
       const registeredTool = registry.getTool('pb_user_current');
       expect(registeredTool).toBeTruthy();
 
       const result = await registeredTool!.execute({});
-      expect(result).toEqual({
-        success: true,
-        data: mockUser,
+
+      // Expect MCP content format
+      expect(result).toHaveProperty('content');
+      expect(Array.isArray((result as any).content)).toBe(true);
+      expect((result as any).content[0]).toHaveProperty('type', 'text');
+      expect((result as any).content[0]).toHaveProperty('text');
+
+      // Verify the response contains the expected data
+      const responseText = (result as any).content[0].text;
+      const responseData = JSON.parse(responseText);
+      expect(responseData).toHaveProperty('success', true);
+      expect(responseData.data).toMatchObject({
+        id: mockUserId,
+        role: mockRole,
+        spaceId: mockSpaceId,
+        authenticated: true,
       });
     });
   });

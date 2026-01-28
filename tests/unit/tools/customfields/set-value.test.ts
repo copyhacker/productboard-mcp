@@ -119,8 +119,15 @@ describe('SetCustomFieldValueTool', () => {
         value: 'High Priority',
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: expectedResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -151,8 +158,15 @@ describe('SetCustomFieldValueTool', () => {
         value: 8,
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: expectedResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -183,8 +197,15 @@ describe('SetCustomFieldValueTool', () => {
         value: '2024-03-15',
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: expectedResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -215,8 +236,15 @@ describe('SetCustomFieldValueTool', () => {
         value: true,
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: expectedResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -247,8 +275,15 @@ describe('SetCustomFieldValueTool', () => {
         value: 'approved',
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: expectedResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -279,8 +314,15 @@ describe('SetCustomFieldValueTool', () => {
         value: ['ui', 'mobile', 'api'],
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: expectedResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -311,8 +353,15 @@ describe('SetCustomFieldValueTool', () => {
         value: 'standup',
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: expectedResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -338,8 +387,15 @@ describe('SetCustomFieldValueTool', () => {
       const result = await tool.execute(validInput);
 
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: expectedResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -370,8 +426,15 @@ describe('SetCustomFieldValueTool', () => {
         value: null,
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: expectedResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -388,8 +451,15 @@ describe('SetCustomFieldValueTool', () => {
       const result = await tool.execute(validInput);
       
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to set custom field value: API Error',
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: false,
+              error: 'Failed to set custom field value: API Error',
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -416,8 +486,15 @@ describe('SetCustomFieldValueTool', () => {
       const result = await tool.execute(validInput);
       
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to set custom field value: Authentication failed',
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: false,
+              error: 'Failed to set custom field value: Authentication failed',
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -448,8 +525,15 @@ describe('SetCustomFieldValueTool', () => {
       const result = await tool.execute(validInput);
       
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to set custom field value: Validation error',
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: false,
+              error: 'Failed to set custom field value: Validation error',
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -479,8 +563,15 @@ describe('SetCustomFieldValueTool', () => {
       const result = await tool.execute(validInput);
       
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to set custom field value: Not found',
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: false,
+              error: 'Failed to set custom field value: Not found',
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -495,8 +586,12 @@ describe('SetCustomFieldValueTool', () => {
       const result = await uninitializedTool.execute(validInput);
       
       expect(result).toEqual({
-        success: false,
-        error: expect.stringContaining('Failed to set custom field value:'),
+        content: [
+          {
+            type: 'text',
+            text: expect.stringContaining('Failed to set custom field value:'),
+          },
+        ],
       });
     });
   });
@@ -523,15 +618,23 @@ describe('SetCustomFieldValueTool', () => {
       });
 
       expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: apiResponse,
+            }, null, 2),
+          },
+        ],
       });
-      expect((result as any).data).toHaveProperty('entity_id', 'feat_123');
-      expect((result as any).data).toHaveProperty('entity_type', 'feature');
-      expect((result as any).data).toHaveProperty('field_id', 'cf_123');
-      expect((result as any).data).toHaveProperty('field_name', 'Priority Level');
-      expect((result as any).data).toHaveProperty('value', 'High Priority');
-      expect((result as any).data).toHaveProperty('updated_at');
+      const parsedContent = JSON.parse((result as any).content[0].text);
+      expect(parsedContent.data).toHaveProperty('entity_id', 'feat_123');
+      expect(parsedContent.data).toHaveProperty('entity_type', 'feature');
+      expect(parsedContent.data).toHaveProperty('field_id', 'cf_123');
+      expect(parsedContent.data).toHaveProperty('field_name', 'Priority Level');
+      expect(parsedContent.data).toHaveProperty('value', 'High Priority');
+      expect(parsedContent.data).toHaveProperty('updated_at');
     });
   });
 });

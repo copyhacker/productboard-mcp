@@ -151,13 +151,21 @@ describe('CreateKeyResultTool', () => {
         created_at: '2024-01-15T10:00:00Z',
         updated_at: '2024-01-15T10:00:00Z',
       };
-      
+
       mockClient.post.mockResolvedValueOnce(expectedResponse);
 
       const result = await tool.execute(validInput);
 
       expect(mockClient.post).toHaveBeenCalledWith('/keyresults', validInput);
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -185,7 +193,15 @@ describe('CreateKeyResultTool', () => {
       const result = await tool.execute(minimalInput);
 
       expect(mockClient.post).toHaveBeenCalledWith('/keyresults', minimalInput);
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -208,17 +224,25 @@ describe('CreateKeyResultTool', () => {
         current_value: 75,
         target_value: 90,
         unit: '%',
-        progress: 0.83, // (75-0)/(90-0) 
+        progress: 0.83, // (75-0)/(90-0)
         created_at: '2024-01-15T10:00:00Z',
         updated_at: '2024-01-15T10:00:00Z',
       };
-      
+
       mockClient.post.mockResolvedValueOnce(expectedResponse);
 
       const result = await tool.execute(validInput);
 
       expect(mockClient.post).toHaveBeenCalledWith('/keyresults', validInput);
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -245,13 +269,21 @@ describe('CreateKeyResultTool', () => {
         created_at: '2024-01-15T10:00:00Z',
         updated_at: '2024-01-15T10:00:00Z',
       };
-      
+
       mockClient.post.mockResolvedValueOnce(expectedResponse);
 
       const result = await tool.execute(validInput);
 
       expect(mockClient.post).toHaveBeenCalledWith('/keyresults', validInput);
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -267,8 +299,16 @@ describe('CreateKeyResultTool', () => {
       mockClient.post.mockRejectedValueOnce(new Error('API Error'));
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'Failed to create key result: API Error',
       });
@@ -294,8 +334,16 @@ describe('CreateKeyResultTool', () => {
       mockClient.post.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'Failed to create key result: Objective not found',
       });
@@ -321,8 +369,16 @@ describe('CreateKeyResultTool', () => {
       mockClient.post.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'Failed to create key result: Authentication failed',
       });
@@ -352,8 +408,16 @@ describe('CreateKeyResultTool', () => {
       mockClient.post.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'Failed to create key result: Validation error',
       });
@@ -367,8 +431,16 @@ describe('CreateKeyResultTool', () => {
         target_value: 10000,
       };
       const result = await uninitializedTool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: expect.stringContaining('Failed to create key result:'),
       });
@@ -397,14 +469,22 @@ describe('CreateKeyResultTool', () => {
         target_value: 100,
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: apiResponse,
       });
-      expect((result as any).data).toHaveProperty('id', 'kr_123');
-      expect((result as any).data).toHaveProperty('objective_id', 'obj_456');
-      expect((result as any).data).toHaveProperty('progress', 0.5);
-      expect((result as any).data).toHaveProperty('created_at');
+      expect(response.data).toHaveProperty('id', 'kr_123');
+      expect(response.data).toHaveProperty('objective_id', 'obj_456');
+      expect(response.data).toHaveProperty('progress', 0.5);
+      expect(response.data).toHaveProperty('created_at');
     });
   });
 });

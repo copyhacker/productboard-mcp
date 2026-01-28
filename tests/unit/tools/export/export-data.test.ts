@@ -231,8 +231,13 @@ describe('ExportDataTool', () => {
         include_related: true,
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
     });
 
@@ -287,8 +292,13 @@ describe('ExportDataTool', () => {
         email_to: 'user@example.com',
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
     });
 
@@ -303,8 +313,13 @@ describe('ExportDataTool', () => {
       const result = await tool.execute(validInput);
       
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to export data: API Error',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to export data: API Error',
+          }, null, 2),
+        }],
       });
       expect(mockLogger.error).toHaveBeenCalledWith('Failed to export data', expect.any(Error));
     });
@@ -329,8 +344,13 @@ describe('ExportDataTool', () => {
       const result = await tool.execute(validInput);
       
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to export data: Authentication failed',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to export data: Authentication failed',
+          }, null, 2),
+        }],
       });
     });
 
@@ -354,8 +374,13 @@ describe('ExportDataTool', () => {
       const result = await tool.execute(validInput);
       
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to export data: Insufficient permissions',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to export data: Insufficient permissions',
+          }, null, 2),
+        }],
       });
     });
 
@@ -387,8 +412,13 @@ describe('ExportDataTool', () => {
       const result = await tool.execute(validInput);
       
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to export data: Validation error',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to export data: Validation error',
+          }, null, 2),
+        }],
       });
     });
 
@@ -400,7 +430,8 @@ describe('ExportDataTool', () => {
       };
       const result = await uninitializedTool.execute(validInput);
       
-      expect(result).toEqual({
+      const resultObj = JSON.parse((result as any).content[0].text);
+      expect(resultObj).toMatchObject({
         success: false,
         error: expect.stringContaining('Failed to export data:'),
       });
@@ -451,8 +482,13 @@ describe('ExportDataTool', () => {
       const result = await tool.execute(input);
 
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
     });
   });
@@ -481,13 +517,19 @@ describe('ExportDataTool', () => {
       });
 
       expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: apiResponse,
+          }, null, 2),
+        }],
       });
-      expect((result as any).data).toHaveProperty('export_id', 'exp_complete');
-      expect((result as any).data).toHaveProperty('status', 'completed');
-      expect((result as any).data).toHaveProperty('file_url');
-      expect((result as any).data).toHaveProperty('record_count', 1500);
+      const parsedData = JSON.parse((result as any).content[0].text);
+      expect(parsedData.data).toHaveProperty('export_id', 'exp_complete');
+      expect(parsedData.data).toHaveProperty('status', 'completed');
+      expect(parsedData.data).toHaveProperty('file_url');
+      expect(parsedData.data).toHaveProperty('record_count', 1500);
     });
 
     it('should handle minimal response structure', async () => {
@@ -506,8 +548,13 @@ describe('ExportDataTool', () => {
       });
 
       expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: apiResponse,
+          }, null, 2),
+        }],
       });
     });
 
@@ -532,11 +579,17 @@ describe('ExportDataTool', () => {
       });
 
       expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: apiResponse,
+          }, null, 2),
+        }],
       });
-      expect((result as any).data).toHaveProperty('email_to', 'manager@company.com');
-      expect((result as any).data).toHaveProperty('delivery_method', 'email');
+      const parsedData = JSON.parse((result as any).content[0].text);
+      expect(parsedData.data).toHaveProperty('email_to', 'manager@company.com');
+      expect(parsedData.data).toHaveProperty('delivery_method', 'email');
     });
   });
 });

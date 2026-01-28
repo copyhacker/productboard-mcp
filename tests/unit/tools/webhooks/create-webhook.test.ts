@@ -182,7 +182,15 @@ describe('CreateWebhookTool', () => {
       const result = await tool.execute(validInput);
 
       expect(mockClient.post).toHaveBeenCalledWith('/webhooks', validInput);
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -209,7 +217,15 @@ describe('CreateWebhookTool', () => {
       const result = await tool.execute(minimalInput);
 
       expect(mockClient.post).toHaveBeenCalledWith('/webhooks', minimalInput);
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -252,7 +268,15 @@ describe('CreateWebhookTool', () => {
       const result = await tool.execute(validInput);
 
       expect(mockClient.post).toHaveBeenCalledWith('/webhooks', validInput);
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -280,7 +304,15 @@ describe('CreateWebhookTool', () => {
       const result = await tool.execute(validInput);
 
       expect(mockClient.post).toHaveBeenCalledWith('/webhooks', validInput);
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -296,8 +328,16 @@ describe('CreateWebhookTool', () => {
       mockClient.post.mockRejectedValueOnce(new Error('API Error'));
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: 'Failed to create webhook: API Error',
       });
@@ -323,8 +363,16 @@ describe('CreateWebhookTool', () => {
       mockClient.post.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: 'Failed to create webhook: Webhook URL is not reachable',
       });
@@ -350,8 +398,16 @@ describe('CreateWebhookTool', () => {
       mockClient.post.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: 'Failed to create webhook: Authentication failed',
       });
@@ -377,8 +433,16 @@ describe('CreateWebhookTool', () => {
       mockClient.post.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: 'Failed to create webhook: Admin access required',
       });
@@ -409,8 +473,16 @@ describe('CreateWebhookTool', () => {
       mockClient.post.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: 'Failed to create webhook: Validation error',
       });
@@ -424,8 +496,16 @@ describe('CreateWebhookTool', () => {
         events: ['feature.created'],
       };
       const result = await uninitializedTool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: expect.stringContaining('Failed to create webhook:'),
       });
@@ -452,15 +532,23 @@ describe('CreateWebhookTool', () => {
         events: ['feature.created'],
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: apiResponse,
       });
-      expect((result as any).data).toHaveProperty('id', 'webhook_123');
-      expect((result as any).data).toHaveProperty('name', 'Test Webhook');
-      expect((result as any).data).toHaveProperty('url', 'https://example.com/webhook');
-      expect((result as any).data).toHaveProperty('events');
-      expect((result as any).data).toHaveProperty('created_at');
+      expect(resultData.data).toHaveProperty('id', 'webhook_123');
+      expect(resultData.data).toHaveProperty('name', 'Test Webhook');
+      expect(resultData.data).toHaveProperty('url', 'https://example.com/webhook');
+      expect(resultData.data).toHaveProperty('events');
+      expect(resultData.data).toHaveProperty('created_at');
     });
 
     it('should handle webhook with secret in response', async () => {
@@ -484,11 +572,19 @@ describe('CreateWebhookTool', () => {
         secret: 'actual_secret_123',
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: apiResponse,
       });
-      expect((result as any).data).toHaveProperty('secret', '***masked***');
+      expect(resultData.data).toHaveProperty('secret', '***masked***');
     });
   });
 });

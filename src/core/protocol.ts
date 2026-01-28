@@ -97,8 +97,9 @@ export class MCPProtocolHandler implements ProtocolHandler {
       return result;
     } catch (error) {
       this.logger.error(`Tool ${toolName} execution failed`, error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       throw new ToolExecutionError(
-        `Failed to execute tool ${toolName}`,
+        `Failed to execute tool ${toolName}: ${errorMessage}`,
         toolName,
         error instanceof Error ? error : undefined,
       );

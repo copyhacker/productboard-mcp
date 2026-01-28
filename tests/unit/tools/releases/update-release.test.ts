@@ -148,8 +148,13 @@ describe('UpdateReleaseTool', () => {
         release_group_id: 'group_456',
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
     });
 
@@ -176,8 +181,13 @@ describe('UpdateReleaseTool', () => {
         status: 'released',
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
     });
 
@@ -189,8 +199,13 @@ describe('UpdateReleaseTool', () => {
       const result = await tool.execute(input);
 
       expect(result).toEqual({
-        success: false,
-        error: 'No update fields provided',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'No update fields provided',
+          }, null, 2),
+        }],
       });
     });
 
@@ -203,10 +218,15 @@ describe('UpdateReleaseTool', () => {
       mockClient.put.mockRejectedValueOnce(new Error('API Error'));
 
       const result = await tool.execute(validInput);
-      
+
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to update release: API Error',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to update release: API Error',
+          }, null, 2),
+        }],
       });
     });
 
@@ -229,10 +249,15 @@ describe('UpdateReleaseTool', () => {
       mockClient.put.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
+
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to update release: Authentication failed',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to update release: Authentication failed',
+          }, null, 2),
+        }],
       });
     });
 
@@ -260,10 +285,15 @@ describe('UpdateReleaseTool', () => {
       mockClient.put.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
+
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to update release: Validation error',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to update release: Validation error',
+          }, null, 2),
+        }],
       });
     });
 
@@ -286,10 +316,15 @@ describe('UpdateReleaseTool', () => {
       mockClient.put.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
+
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to update release: Not found',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to update release: Not found',
+          }, null, 2),
+        }],
       });
     });
 
@@ -300,11 +335,10 @@ describe('UpdateReleaseTool', () => {
         name: 'v1.0.1',
       };
       const result = await uninitializedTool.execute(validInput);
-      
-      expect(result).toEqual({
-        success: false,
-        error: expect.stringContaining('Failed to update release:'),
-      });
+
+      const parsedResult = JSON.parse((result as any).content[0].text);
+      expect(parsedResult).toHaveProperty('success', false);
+      expect(parsedResult.error).toContain('Failed to update release:');
     });
   });
 
@@ -327,12 +361,19 @@ describe('UpdateReleaseTool', () => {
       });
 
       expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: apiResponse,
+          }, null, 2),
+        }],
       });
-      expect((result as any).data).toHaveProperty('id', 'rel_123');
-      expect((result as any).data).toHaveProperty('name', 'v1.0.1');
-      expect((result as any).data).toHaveProperty('updated_at');
+      const parsedResponse = JSON.parse((result as any).content[0].text);
+      expect(parsedResponse).toHaveProperty('success', true);
+      expect(parsedResponse.data).toHaveProperty('id', 'rel_123');
+      expect(parsedResponse.data).toHaveProperty('name', 'v1.0.1');
+      expect(parsedResponse.data).toHaveProperty('updated_at');
     });
   });
 });

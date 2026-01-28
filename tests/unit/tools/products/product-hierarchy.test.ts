@@ -97,10 +97,16 @@ describe('ProductHierarchyTool', () => {
         { depth: 3 }
       );
 
-      expect(result).toEqual({
-        success: true,
-        data: mockHierarchy,
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
       });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData.success).toBe(true);
+      expect(resultData.data.products).toHaveLength(2);
 
       expect(mockLogger.info).toHaveBeenCalledWith('Getting product hierarchy');
     });
@@ -119,8 +125,17 @@ describe('ProductHierarchyTool', () => {
         { product_id: 'prod-1', depth: 3 }
       );
 
-      expect((result as any).data.products).toHaveLength(1);
-      expect((result as any).data.products[0].id).toBe('prod-1');
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData.success).toBe(true);
+      expect(resultData.data.products).toHaveLength(1);
+      expect(resultData.data.products[0].id).toBe('prod-1');
     });
 
     it('should respect custom depth parameter', async () => {
@@ -164,8 +179,18 @@ describe('ProductHierarchyTool', () => {
         { depth: 3, include_features: true }
       );
 
-      expect((result as any).data.products[0]).toHaveProperty('features');
-      expect((result as any).data.products[0].children[0]).toHaveProperty('features');
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData.success).toBe(true);
+      expect(resultData.data.products[0]).toHaveProperty('features');
+      expect(resultData.data.products[0].features).toHaveLength(2);
+      expect(resultData.data.products[0].children[0]).toHaveProperty('features');
     });
 
     it('should validate depth parameter range', async () => {
@@ -181,10 +206,16 @@ describe('ProductHierarchyTool', () => {
 
       const result = await tool.execute({});
 
-      expect(result).toEqual({
-        success: true,
-        data: { products: [] },
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
       });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData.success).toBe(true);
+      expect(resultData.data.products).toEqual([]);
     });
 
     it('should handle API errors', async () => {

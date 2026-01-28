@@ -151,7 +151,15 @@ describe('UpdateKeyResultTool', () => {
         current_value: 7500,
         target_value: 15000,
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -182,7 +190,15 @@ describe('UpdateKeyResultTool', () => {
       expect(mockClient.put).toHaveBeenCalledWith('/keyresults/kr_123', {
         current_value: 8000,
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -219,7 +235,15 @@ describe('UpdateKeyResultTool', () => {
         target_value: 95,
         unit: '%',
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -256,7 +280,15 @@ describe('UpdateKeyResultTool', () => {
         target_value: 120000,
         unit: 'USD',
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -269,7 +301,15 @@ describe('UpdateKeyResultTool', () => {
 
       const result = await tool.execute(input);
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'No update fields provided',
       });
@@ -285,8 +325,16 @@ describe('UpdateKeyResultTool', () => {
       mockClient.put.mockRejectedValueOnce(new Error('API Error'));
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'Failed to update key result: API Error',
       });
@@ -311,8 +359,16 @@ describe('UpdateKeyResultTool', () => {
       mockClient.put.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'Failed to update key result: Key result not found',
       });
@@ -337,8 +393,16 @@ describe('UpdateKeyResultTool', () => {
       mockClient.put.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'Failed to update key result: Authentication failed',
       });
@@ -367,8 +431,16 @@ describe('UpdateKeyResultTool', () => {
       mockClient.put.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'Failed to update key result: Validation error',
       });
@@ -381,8 +453,16 @@ describe('UpdateKeyResultTool', () => {
         current_value: 7500,
       };
       const result = await uninitializedTool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: expect.stringContaining('Failed to update key result:'),
       });
@@ -410,14 +490,22 @@ describe('UpdateKeyResultTool', () => {
         current_value: 7500,
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: apiResponse,
       });
-      expect((result as any).data).toHaveProperty('id', 'kr_123');
-      expect((result as any).data).toHaveProperty('current_value', 7500);
-      expect((result as any).data).toHaveProperty('progress', 0.5);
-      expect((result as any).data).toHaveProperty('updated_at');
+      expect(response.data).toHaveProperty('id', 'kr_123');
+      expect(response.data).toHaveProperty('current_value', 7500);
+      expect(response.data).toHaveProperty('progress', 0.5);
+      expect(response.data).toHaveProperty('updated_at');
     });
 
     it('should handle progress calculation correctly', async () => {
@@ -438,11 +526,19 @@ describe('UpdateKeyResultTool', () => {
         current_value: 80,
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: apiResponse,
       });
-      expect((result as any).data.progress).toBe(0.89);
+      expect(response.data.progress).toBe(0.89);
     });
   });
 });

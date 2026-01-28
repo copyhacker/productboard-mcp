@@ -133,7 +133,15 @@ describe('ListWebhooksTool', () => {
         endpoint: '/webhooks',
         params: {},
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -169,7 +177,15 @@ describe('ListWebhooksTool', () => {
           active: true,
         },
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -205,7 +221,15 @@ describe('ListWebhooksTool', () => {
           active: false,
         },
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -250,7 +274,15 @@ describe('ListWebhooksTool', () => {
           event_type: 'feature.created',
         },
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -288,7 +320,15 @@ describe('ListWebhooksTool', () => {
           event_type: 'note.updated',
         },
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -298,8 +338,16 @@ describe('ListWebhooksTool', () => {
       mockClient.makeRequest.mockRejectedValueOnce(new Error('API Error'));
 
       const result = await tool.execute({});
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: 'Failed to list webhooks: API Error',
       });
@@ -319,8 +367,16 @@ describe('ListWebhooksTool', () => {
       mockClient.makeRequest.mockRejectedValueOnce(error);
 
       const result = await tool.execute({});
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: 'Failed to list webhooks: Authentication failed',
       });
@@ -340,8 +396,16 @@ describe('ListWebhooksTool', () => {
       mockClient.makeRequest.mockRejectedValueOnce(error);
 
       const result = await tool.execute({});
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: 'Failed to list webhooks: Admin access required',
       });
@@ -350,8 +414,16 @@ describe('ListWebhooksTool', () => {
     it('should throw error if client not initialized', async () => {
       const uninitializedTool = new ListWebhooksTool(null as any, mockLogger);
       const result = await uninitializedTool.execute({});
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: expect.stringContaining('Failed to list webhooks:'),
       });
@@ -379,17 +451,25 @@ describe('ListWebhooksTool', () => {
 
       const result = await tool.execute({});
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: apiResponse,
       });
-      expect((result as any).data).toHaveProperty('webhooks');
-      expect((result as any).data).toHaveProperty('total', 1);
-      expect((result as any).data.webhooks[0]).toHaveProperty('id', 'webhook_123');
-      expect((result as any).data.webhooks[0]).toHaveProperty('name', 'Test Webhook');
-      expect((result as any).data.webhooks[0]).toHaveProperty('url');
-      expect((result as any).data.webhooks[0]).toHaveProperty('events');
-      expect((result as any).data.webhooks[0]).toHaveProperty('active');
+      expect(resultData.data).toHaveProperty('webhooks');
+      expect(resultData.data).toHaveProperty('total', 1);
+      expect(resultData.data.webhooks[0]).toHaveProperty('id', 'webhook_123');
+      expect(resultData.data.webhooks[0]).toHaveProperty('name', 'Test Webhook');
+      expect(resultData.data.webhooks[0]).toHaveProperty('url');
+      expect(resultData.data.webhooks[0]).toHaveProperty('events');
+      expect(resultData.data.webhooks[0]).toHaveProperty('active');
     });
 
     it('should handle empty results', async () => {
@@ -402,12 +482,20 @@ describe('ListWebhooksTool', () => {
 
       const result = await tool.execute({});
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: apiResponse,
       });
-      expect((result as any).data.webhooks).toHaveLength(0);
-      expect((result as any).data.total).toBe(0);
+      expect(resultData.data.webhooks).toHaveLength(0);
+      expect(resultData.data.total).toBe(0);
     });
 
     it('should handle webhooks with secrets masked', async () => {
@@ -440,12 +528,20 @@ describe('ListWebhooksTool', () => {
 
       const result = await tool.execute({});
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: apiResponse,
       });
-      expect((result as any).data.webhooks[0]).toHaveProperty('secret', '***masked***');
-      expect((result as any).data.webhooks[1]).not.toHaveProperty('secret');
+      expect(resultData.data.webhooks[0]).toHaveProperty('secret', '***masked***');
+      expect(resultData.data.webhooks[1]).not.toHaveProperty('secret');
     });
 
     it('should handle multiple event types correctly', async () => {
@@ -475,13 +571,21 @@ describe('ListWebhooksTool', () => {
 
       const result = await tool.execute({});
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: apiResponse,
       });
-      expect((result as any).data.webhooks[0].events).toHaveLength(6);
-      expect((result as any).data.webhooks[0].events).toContain('feature.created');
-      expect((result as any).data.webhooks[0].events).toContain('user.created');
+      expect(resultData.data.webhooks[0].events).toHaveLength(6);
+      expect(resultData.data.webhooks[0].events).toContain('feature.created');
+      expect(resultData.data.webhooks[0].events).toContain('user.created');
     });
 
     it('should handle different webhook statuses', async () => {
@@ -513,12 +617,20 @@ describe('ListWebhooksTool', () => {
 
       const result = await tool.execute({});
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: apiResponse,
       });
-      expect((result as any).data.webhooks[0].active).toBe(true);
-      expect((result as any).data.webhooks[1].active).toBe(false);
+      expect(resultData.data.webhooks[0].active).toBe(true);
+      expect(resultData.data.webhooks[1].active).toBe(false);
     });
   });
 });

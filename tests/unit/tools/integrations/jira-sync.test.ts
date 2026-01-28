@@ -196,8 +196,13 @@ describe('JiraSyncTool', () => {
         },
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
       expect(mockLogger.info).toHaveBeenCalledWith(
         'Syncing with JIRA',
@@ -258,8 +263,13 @@ describe('JiraSyncTool', () => {
         },
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
     });
 
@@ -303,8 +313,13 @@ describe('JiraSyncTool', () => {
         },
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
     });
 
@@ -318,8 +333,13 @@ describe('JiraSyncTool', () => {
       const result = await tool.execute(validInput);
       
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to sync with JIRA: JIRA API connection failed',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to sync with JIRA: JIRA API connection failed',
+          }, null, 2),
+        }],
       });
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Failed to sync with JIRA',
@@ -348,8 +368,13 @@ describe('JiraSyncTool', () => {
       const result = await tool.execute(validInput);
       
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to sync with JIRA: JIRA authentication failed',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to sync with JIRA: JIRA authentication failed',
+          }, null, 2),
+        }],
       });
     });
 
@@ -374,8 +399,13 @@ describe('JiraSyncTool', () => {
       const result = await tool.execute(validInput);
       
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to sync with JIRA: JIRA project not found',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to sync with JIRA: JIRA project not found',
+          }, null, 2),
+        }],
       });
     });
 
@@ -410,11 +440,17 @@ describe('JiraSyncTool', () => {
       const result = await tool.execute(validInput);
 
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
-      expect((result as any).data.errors).toHaveLength(1);
-      expect((result as any).data.sync_summary.conflicts_encountered).toBe(1);
+      const parsedData = JSON.parse((result as any).content[0].text);
+      expect(parsedData.data.errors).toHaveLength(1);
+      expect(parsedData.data.sync_summary.conflicts_encountered).toBe(1);
     });
 
     it('should throw error if client not initialized', async () => {
@@ -423,8 +459,9 @@ describe('JiraSyncTool', () => {
         action: 'sync' as const,
       };
       const result = await uninitializedTool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      const resultObj = JSON.parse((result as any).content[0].text);
+      expect(resultObj).toMatchObject({
         success: false,
         error: expect.stringContaining('Failed to sync with JIRA:'),
       });
@@ -549,13 +586,19 @@ describe('JiraSyncTool', () => {
       });
 
       expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: apiResponse,
+          }, null, 2),
+        }],
       });
-      expect((result as any).data).toHaveProperty('action', 'sync');
-      expect((result as any).data).toHaveProperty('synced_items', 25);
-      expect((result as any).data).toHaveProperty('sync_summary');
-      expect((result as any).data.sync_summary).toHaveProperty('features_synced', 15);
+      const parsedData = JSON.parse((result as any).content[0].text);
+      expect(parsedData.data).toHaveProperty('action', 'sync');
+      expect(parsedData.data).toHaveProperty('synced_items', 25);
+      expect(parsedData.data).toHaveProperty('sync_summary');
+      expect(parsedData.data.sync_summary).toHaveProperty('features_synced', 15);
     });
 
     it('should transform API response correctly for import action', async () => {
@@ -585,12 +628,18 @@ describe('JiraSyncTool', () => {
       });
 
       expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: apiResponse,
+          }, null, 2),
+        }],
       });
-      expect((result as any).data.action).toBe('import');
-      expect((result as any).data.errors).toHaveLength(1);
-      expect((result as any).data.sync_summary.features_created).toBe(8);
+      const parsedData = JSON.parse((result as any).content[0].text);
+      expect(parsedData.data.action).toBe('import');
+      expect(parsedData.data.errors).toHaveLength(1);
+      expect(parsedData.data.sync_summary.features_created).toBe(8);
     });
 
     it('should transform API response correctly for export action', async () => {
@@ -615,11 +664,17 @@ describe('JiraSyncTool', () => {
       });
 
       expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: apiResponse,
+          }, null, 2),
+        }],
       });
-      expect((result as any).data.action).toBe('export');
-      expect((result as any).data.sync_summary.issues_created).toBe(3);
+      const parsedData = JSON.parse((result as any).content[0].text);
+      expect(parsedData.data.action).toBe('export');
+      expect(parsedData.data.sync_summary.issues_created).toBe(3);
     });
 
     it('should handle empty sync results', async () => {
@@ -647,11 +702,17 @@ describe('JiraSyncTool', () => {
       });
 
       expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: apiResponse,
+          }, null, 2),
+        }],
       });
-      expect((result as any).data.synced_items).toBe(0);
-      expect((result as any).data.errors).toHaveLength(1);
+      const parsedData = JSON.parse((result as any).content[0].text);
+      expect(parsedData.data.synced_items).toBe(0);
+      expect(parsedData.data.errors).toHaveLength(1);
     });
   });
 });

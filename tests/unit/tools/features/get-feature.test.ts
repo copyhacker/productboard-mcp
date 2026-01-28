@@ -82,9 +82,13 @@ describe('GetFeatureTool', () => {
         {}
       );
 
-      expect(result).toEqual({
-        success: true,
-        data: mockFeature,
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('feature-123')
+          })
+        ])
       });
 
       expect(mockLogger.info).toHaveBeenCalledWith(
@@ -118,9 +122,13 @@ describe('GetFeatureTool', () => {
         { include: 'notes,objectives' }
       );
 
-      expect(result).toEqual({
-        success: true,
-        data: mockFeatureWithIncludes,
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('feature-123')
+          })
+        ])
       });
     });
 

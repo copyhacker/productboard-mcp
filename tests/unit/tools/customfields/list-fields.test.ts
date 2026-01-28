@@ -135,8 +135,15 @@ describe('ListCustomFieldsTool', () => {
         params: {},
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: expectedResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -180,8 +187,15 @@ describe('ListCustomFieldsTool', () => {
         },
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: expectedResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -227,8 +241,15 @@ describe('ListCustomFieldsTool', () => {
         },
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: expectedResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -273,8 +294,15 @@ describe('ListCustomFieldsTool', () => {
         },
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: expectedResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -313,8 +341,15 @@ describe('ListCustomFieldsTool', () => {
         },
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: expectedResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -333,8 +368,15 @@ describe('ListCustomFieldsTool', () => {
       const result = await tool.execute(input);
 
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: expectedResponse,
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -344,8 +386,15 @@ describe('ListCustomFieldsTool', () => {
       const result = await tool.execute({});
       
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to list custom fields: API Error',
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: false,
+              error: 'Failed to list custom fields: API Error',
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -365,8 +414,15 @@ describe('ListCustomFieldsTool', () => {
       const result = await tool.execute({});
       
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to list custom fields: Authentication failed',
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: false,
+              error: 'Failed to list custom fields: Authentication failed',
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -392,8 +448,15 @@ describe('ListCustomFieldsTool', () => {
       const result = await tool.execute(input);
       
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to list custom fields: Validation error',
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: false,
+              error: 'Failed to list custom fields: Validation error',
+            }, null, 2),
+          },
+        ],
       });
     });
 
@@ -402,8 +465,12 @@ describe('ListCustomFieldsTool', () => {
       const result = await uninitializedTool.execute({});
       
       expect(result).toEqual({
-        success: false,
-        error: expect.stringContaining('Failed to list custom fields:'),
+        content: [
+          {
+            type: 'text',
+            text: expect.stringContaining('Failed to list custom fields:'),
+          },
+        ],
       });
     });
   });
@@ -430,14 +497,22 @@ describe('ListCustomFieldsTool', () => {
       const result = await tool.execute({});
 
       expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: apiResponse,
+            }, null, 2),
+          },
+        ],
       });
-      expect((result as any).data).toHaveProperty('fields');
-      expect((result as any).data).toHaveProperty('total', 1);
-      expect((result as any).data.fields[0]).toHaveProperty('id', 'cf_123');
-      expect((result as any).data.fields[0]).toHaveProperty('name', 'Priority Level');
-      expect((result as any).data.fields[0]).toHaveProperty('type', 'text');
+      const parsedContent = JSON.parse((result as any).content[0].text);
+      expect(parsedContent.data).toHaveProperty('fields');
+      expect(parsedContent.data).toHaveProperty('total', 1);
+      expect(parsedContent.data.fields[0]).toHaveProperty('id', 'cf_123');
+      expect(parsedContent.data.fields[0]).toHaveProperty('name', 'Priority Level');
+      expect(parsedContent.data.fields[0]).toHaveProperty('type', 'text');
     });
 
     it('should transform API response with select field options', async () => {
@@ -462,11 +537,19 @@ describe('ListCustomFieldsTool', () => {
       const result = await tool.execute({ type: 'select' });
 
       expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              data: apiResponse,
+            }, null, 2),
+          },
+        ],
       });
-      expect((result as any).data.fields[0]).toHaveProperty('options');
-      expect((result as any).data.fields[0].options).toEqual(['draft', 'review', 'approved', 'rejected']);
+      const parsedContent = JSON.parse((result as any).content[0].text);
+      expect(parsedContent.data.fields[0]).toHaveProperty('options');
+      expect(parsedContent.data.fields[0].options).toEqual(['draft', 'review', 'approved', 'rejected']);
     });
   });
 });

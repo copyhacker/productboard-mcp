@@ -135,7 +135,15 @@ describe('LinkFeaturesToObjectiveTool', () => {
       expect(mockClient.post).toHaveBeenCalledWith('/objectives/obj_123/features', {
         feature_ids: ['feat_456', 'feat_789', 'feat_012'],
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -166,7 +174,15 @@ describe('LinkFeaturesToObjectiveTool', () => {
       expect(mockClient.post).toHaveBeenCalledWith('/objectives/obj_123/features', {
         feature_ids: ['feat_456'],
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -209,7 +225,15 @@ describe('LinkFeaturesToObjectiveTool', () => {
       expect(mockClient.post).toHaveBeenCalledWith('/objectives/obj_123/features', {
         feature_ids: ['feat_456', 'feat_invalid', 'feat_789'],
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -224,8 +248,16 @@ describe('LinkFeaturesToObjectiveTool', () => {
       mockClient.post.mockRejectedValueOnce(new Error('API Error'));
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'Failed to link features to objective: API Error',
       });
@@ -250,8 +282,16 @@ describe('LinkFeaturesToObjectiveTool', () => {
       mockClient.post.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'Failed to link features to objective: Objective not found',
       });
@@ -276,8 +316,16 @@ describe('LinkFeaturesToObjectiveTool', () => {
       mockClient.post.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'Failed to link features to objective: Authentication failed',
       });
@@ -302,8 +350,16 @@ describe('LinkFeaturesToObjectiveTool', () => {
       mockClient.post.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'Failed to link features to objective: Insufficient permissions',
       });
@@ -332,8 +388,16 @@ describe('LinkFeaturesToObjectiveTool', () => {
       mockClient.post.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: 'Failed to link features to objective: Validation error',
       });
@@ -346,8 +410,16 @@ describe('LinkFeaturesToObjectiveTool', () => {
         feature_ids: ['feat_456'],
       };
       const result = await uninitializedTool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: false,
         error: expect.stringContaining('Failed to link features to objective:'),
       });
@@ -376,14 +448,22 @@ describe('LinkFeaturesToObjectiveTool', () => {
         feature_ids: ['feat_456'],
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: apiResponse,
       });
-      expect((result as any).data).toHaveProperty('objective_id', 'obj_123');
-      expect((result as any).data).toHaveProperty('total_linked', 1);
-      expect((result as any).data.linked_features[0]).toHaveProperty('id', 'feat_456');
-      expect((result as any).data.linked_features[0]).toHaveProperty('linked_at');
+      expect(response.data).toHaveProperty('objective_id', 'obj_123');
+      expect(response.data).toHaveProperty('total_linked', 1);
+      expect(response.data.linked_features[0]).toHaveProperty('id', 'feat_456');
+      expect(response.data.linked_features[0]).toHaveProperty('linked_at');
     });
 
     it('should handle responses with failed links', async () => {
@@ -417,14 +497,22 @@ describe('LinkFeaturesToObjectiveTool', () => {
         feature_ids: ['feat_456', 'feat_invalid', 'feat_archived'],
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: apiResponse,
       });
-      expect((result as any).data).toHaveProperty('failed_links');
-      expect((result as any).data.failed_links).toHaveLength(2);
-      expect((result as any).data.failed_links[0]).toHaveProperty('feature_id', 'feat_invalid');
-      expect((result as any).data.failed_links[1]).toHaveProperty('feature_id', 'feat_archived');
+      expect(response.data).toHaveProperty('failed_links');
+      expect(response.data.failed_links).toHaveLength(2);
+      expect(response.data.failed_links[0]).toHaveProperty('feature_id', 'feat_invalid');
+      expect(response.data.failed_links[1]).toHaveProperty('feature_id', 'feat_archived');
     });
 
     it('should handle empty linked features response', async () => {
@@ -447,12 +535,20 @@ describe('LinkFeaturesToObjectiveTool', () => {
         feature_ids: ['feat_invalid'],
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const response = JSON.parse((result as any).content[0].text);
+      expect(response).toEqual({
         success: true,
         data: apiResponse,
       });
-      expect((result as any).data.linked_features).toHaveLength(0);
-      expect((result as any).data.total_linked).toBe(0);
+      expect(response.data.linked_features).toHaveLength(0);
+      expect(response.data.total_linked).toBe(0);
     });
   });
 });

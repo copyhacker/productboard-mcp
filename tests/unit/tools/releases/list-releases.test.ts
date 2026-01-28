@@ -150,8 +150,13 @@ describe('ListReleasesTool', () => {
         params: {},
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
     });
 
@@ -197,8 +202,13 @@ describe('ListReleasesTool', () => {
         },
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
     });
 
@@ -227,8 +237,13 @@ describe('ListReleasesTool', () => {
         },
       });
       expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: expectedResponse,
+          }, null, 2),
+        }],
       });
     });
 
@@ -236,10 +251,15 @@ describe('ListReleasesTool', () => {
       mockClient.makeRequest.mockRejectedValueOnce(new Error('API Error'));
 
       const result = await tool.execute({});
-      
+
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to list releases: API Error',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to list releases: API Error',
+          }, null, 2),
+        }],
       });
     });
 
@@ -257,21 +277,25 @@ describe('ListReleasesTool', () => {
       mockClient.makeRequest.mockRejectedValueOnce(error);
 
       const result = await tool.execute({});
-      
+
       expect(result).toEqual({
-        success: false,
-        error: 'Failed to list releases: Authentication failed',
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: 'Failed to list releases: Authentication failed',
+          }, null, 2),
+        }],
       });
     });
 
     it('should throw error if client not initialized', async () => {
       const uninitializedTool = new ListReleasesTool(null as any, mockLogger);
       const result = await uninitializedTool.execute({});
-      
-      expect(result).toEqual({
-        success: false,
-        error: expect.stringContaining('Failed to list releases:'),
-      });
+
+      const parsedResult = JSON.parse((result as any).content[0].text);
+      expect(parsedResult).toHaveProperty('success', false);
+      expect(parsedResult.error).toContain('Failed to list releases:');
     });
   });
 
@@ -296,12 +320,19 @@ describe('ListReleasesTool', () => {
       const result = await tool.execute({});
 
       expect(result).toEqual({
-        success: true,
-        data: apiResponse,
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: apiResponse,
+          }, null, 2),
+        }],
       });
-      expect((result as any).data).toHaveProperty('releases');
-      expect((result as any).data).toHaveProperty('total', 1);
-      expect((result as any).data.releases[0]).toHaveProperty('id', 'rel_123');
+      const parsedResponse = JSON.parse((result as any).content[0].text);
+      expect(parsedResponse).toHaveProperty('success', true);
+      expect(parsedResponse.data).toHaveProperty('releases');
+      expect(parsedResponse.data).toHaveProperty('total', 1);
+      expect(parsedResponse.data.releases[0]).toHaveProperty('id', 'rel_123');
     });
   });
 });

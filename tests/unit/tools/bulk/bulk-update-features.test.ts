@@ -99,11 +99,16 @@ describe('BulkUpdateFeaturesTool', () => {
       });
 
       expect(result).toEqual({
-        success: true,
-        data: {
-          data: mockBulkResponse,
-          links: {},
-        },
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: {
+              data: mockBulkResponse,
+              links: {},
+            },
+          }, null, 2),
+        }],
       });
 
       expect(mockLogger.info).toHaveBeenCalledWith(
@@ -142,7 +147,8 @@ describe('BulkUpdateFeaturesTool', () => {
         data: multiFieldParams,
       });
 
-      expect((result as any).data.data.updated).toBe(2);
+      const parsedData = JSON.parse((result as any).content[0].text);
+      expect(parsedData.data.data.updated).toBe(2);
     });
 
     it('should handle partial failures', async () => {
@@ -164,11 +170,16 @@ describe('BulkUpdateFeaturesTool', () => {
       const result = await tool.execute(validParams);
 
       expect(result).toEqual({
-        success: true,
-        data: {
-          data: partialFailureResponse,
-          links: {},
-        },
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            data: {
+              data: partialFailureResponse,
+              links: {},
+            },
+          }, null, 2),
+        }],
       });
 
       // Implementation doesn't currently log warnings for partial failures

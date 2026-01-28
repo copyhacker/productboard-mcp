@@ -137,7 +137,15 @@ describe('TestWebhookTool', () => {
       expect(mockClient.post).toHaveBeenCalledWith('/webhooks/webhook_123456/test', {
         event_type: 'test',
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -167,7 +175,15 @@ describe('TestWebhookTool', () => {
       expect(mockClient.post).toHaveBeenCalledWith('/webhooks/webhook_123456/test', {
         event_type: 'ping',
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -205,7 +221,15 @@ describe('TestWebhookTool', () => {
       expect(mockClient.post).toHaveBeenCalledWith('/webhooks/webhook_123456/test', {
         event_type: 'feature.created',
       });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -232,7 +256,15 @@ describe('TestWebhookTool', () => {
 
       const result = await tool.execute(validInput);
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -260,7 +292,15 @@ describe('TestWebhookTool', () => {
 
       const result = await tool.execute(validInput);
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: expectedResponse,
       });
@@ -275,8 +315,16 @@ describe('TestWebhookTool', () => {
       mockClient.post.mockRejectedValueOnce(new Error('API Error'));
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: 'Failed to test webhook: API Error',
       });
@@ -301,8 +349,16 @@ describe('TestWebhookTool', () => {
       mockClient.post.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: 'Failed to test webhook: Webhook not found',
       });
@@ -327,8 +383,16 @@ describe('TestWebhookTool', () => {
       mockClient.post.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: 'Failed to test webhook: Authentication failed',
       });
@@ -353,8 +417,16 @@ describe('TestWebhookTool', () => {
       mockClient.post.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: 'Failed to test webhook: Admin access required',
       });
@@ -379,8 +451,16 @@ describe('TestWebhookTool', () => {
       mockClient.post.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: 'Failed to test webhook: Webhook is inactive',
       });
@@ -393,8 +473,16 @@ describe('TestWebhookTool', () => {
         test_event: 'test',
       };
       const result = await uninitializedTool.execute(validInput);
-      
-      expect(result).toEqual({
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: false,
         error: expect.stringContaining('Failed to test webhook:'),
       });
@@ -443,15 +531,23 @@ describe('TestWebhookTool', () => {
         test_event: 'test',
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: apiResponse,
       });
-      expect((result as any).data).toHaveProperty('webhook_id', 'webhook_123');
-      expect((result as any).data).toHaveProperty('delivery_id');
-      expect((result as any).data).toHaveProperty('status', 'delivered');
-      expect((result as any).data).toHaveProperty('response_code', 200);
-      expect((result as any).data).toHaveProperty('response_time_ms');
+      expect(resultData.data).toHaveProperty('webhook_id', 'webhook_123');
+      expect(resultData.data).toHaveProperty('delivery_id');
+      expect(resultData.data).toHaveProperty('status', 'delivered');
+      expect(resultData.data).toHaveProperty('response_code', 200);
+      expect(resultData.data).toHaveProperty('response_time_ms');
     });
 
     it('should transform failed test response correctly', async () => {
@@ -474,13 +570,21 @@ describe('TestWebhookTool', () => {
         test_event: 'ping',
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: apiResponse,
       });
-      expect((result as any).data).toHaveProperty('status', 'failed');
-      expect((result as any).data).toHaveProperty('error', 'Connection timeout');
-      expect((result as any).data).toHaveProperty('failed_at');
+      expect(resultData.data).toHaveProperty('status', 'failed');
+      expect(resultData.data).toHaveProperty('error', 'Connection timeout');
+      expect(resultData.data).toHaveProperty('failed_at');
     });
 
     it('should handle test response with payload', async () => {
@@ -511,13 +615,21 @@ describe('TestWebhookTool', () => {
         test_event: 'feature.created',
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: apiResponse,
       });
-      expect((result as any).data).toHaveProperty('payload');
-      expect((result as any).data.payload).toHaveProperty('event', 'feature.created');
-      expect((result as any).data.payload).toHaveProperty('data');
+      expect(resultData.data).toHaveProperty('payload');
+      expect(resultData.data.payload).toHaveProperty('event', 'feature.created');
+      expect(resultData.data.payload).toHaveProperty('data');
     });
 
     it('should handle different response codes correctly', async () => {
@@ -542,11 +654,19 @@ describe('TestWebhookTool', () => {
           test_event: 'test',
         });
 
-        expect(result).toEqual({
+        expect(result).toMatchObject({
+          content: expect.arrayContaining([
+            expect.objectContaining({
+              type: 'text'
+            })
+          ])
+        });
+        const resultData = JSON.parse((result as any).content[0].text);
+        expect(resultData).toEqual({
           success: true,
           data: apiResponse,
         });
-        expect((result as any).data.response_code).toBe(code);
+        expect(resultData.data.response_code).toBe(code);
       }
     });
   });

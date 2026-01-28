@@ -84,7 +84,15 @@ describe('ListCompaniesTool', () => {
         params: {},
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: {
           companies: mockCompanies,
@@ -111,8 +119,16 @@ describe('ListCompaniesTool', () => {
         params: { search: 'Acme' },
       });
 
-      expect((result as any).data.companies).toHaveLength(1);
-      expect((result as any).data.companies[0].name).toContain('Acme');
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData.data.companies).toHaveLength(1);
+      expect(resultData.data.companies[0].name).toContain('Acme');
     });
 
     it('should filter by company size', async () => {
@@ -131,8 +147,16 @@ describe('ListCompaniesTool', () => {
         params: { size: 'small' },
       });
 
-      expect((result as any).data.companies).toHaveLength(1);
-      expect((result as any).data.companies[0].size).toBe('small');
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData.data.companies).toHaveLength(1);
+      expect(resultData.data.companies[0].size).toBe('small');
     });
 
     it('should filter by industry', async () => {
@@ -151,7 +175,15 @@ describe('ListCompaniesTool', () => {
         params: { industry: 'Technology' },
       });
 
-      expect((result as any).data.companies[0].industry).toBe('Technology');
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData.data.companies[0].industry).toBe('Technology');
     });
 
     it('should combine multiple filters', async () => {
@@ -199,7 +231,15 @@ describe('ListCompaniesTool', () => {
 
       const result = await tool.execute({});
 
-      expect((result as any).data.companies[0]).toHaveProperty('metadata');
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData.data.companies[0]).toHaveProperty('metadata');
     });
 
     it('should handle empty results', async () => {
@@ -210,7 +250,15 @@ describe('ListCompaniesTool', () => {
 
       const result = await tool.execute({ industry: 'Non-existent' });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
+      });
+      const resultData = JSON.parse((result as any).content[0].text);
+      expect(resultData).toEqual({
         success: true,
         data: {
           companies: [],

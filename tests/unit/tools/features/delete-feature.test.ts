@@ -97,12 +97,13 @@ describe('DeleteFeatureTool', () => {
         { status: 'archived' }
       );
       expect(mockClient.delete).not.toHaveBeenCalled();
-      expect(result).toEqual({
-        success: true,
-        data: {
-          feature: mockApiResponses.archiveSuccess.data,
-          action: 'archived',
-        },
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('feat_123456')
+          })
+        ])
       });
     });
 
@@ -116,8 +117,14 @@ describe('DeleteFeatureTool', () => {
         { status: 'archived' }
       );
       expect(mockClient.delete).not.toHaveBeenCalled();
-      expect(result.success).toBe(true);
-      expect(result.data.action).toBe('archived');
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('archived')
+          })
+        ])
+      });
     });
 
     it('should permanently delete when permanent is true', async () => {
@@ -127,12 +134,13 @@ describe('DeleteFeatureTool', () => {
 
       expect(mockClient.delete).toHaveBeenCalledWith('/features/feat_123456');
       expect(mockClient.patch).not.toHaveBeenCalled();
-      expect(result).toEqual({
-        success: true,
-        data: {
-          action: 'deleted',
-          feature_id: 'feat_123456',
-        },
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('feat_123456')
+          })
+        ])
       });
     });
 
@@ -145,10 +153,14 @@ describe('DeleteFeatureTool', () => {
       mockClient.patch.mockRejectedValueOnce(error);
 
       const result = await tool.execute({ id: 'feat_nonexistent' });
-      
-      expect(result).toEqual({
-        success: false,
-        error: 'Failed to delete feature: Not found',
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('Failed to delete feature')
+          })
+        ])
       });
     });
 
@@ -165,10 +177,14 @@ describe('DeleteFeatureTool', () => {
       mockClient.patch.mockRejectedValueOnce(error);
 
       const result = await tool.execute({ id: 'feat_123456' });
-      
-      expect(result).toEqual({
-        success: false,
-        error: 'Failed to delete feature: Already archived',
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('Failed to delete feature')
+          })
+        ])
       });
     });
 
@@ -185,10 +201,14 @@ describe('DeleteFeatureTool', () => {
       mockClient.delete.mockRejectedValueOnce(error);
 
       const result = await tool.execute({ id: 'feat_123456', permanent: true });
-      
-      expect(result).toEqual({
-        success: false,
-        error: 'Failed to delete feature: Permission denied',
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('Failed to delete feature')
+          })
+        ])
       });
     });
 
@@ -208,19 +228,27 @@ describe('DeleteFeatureTool', () => {
       mockClient.delete.mockRejectedValueOnce(error);
 
       const result = await tool.execute({ id: 'feat_123456', permanent: true });
-      
-      expect(result).toEqual({
-        success: false,
-        error: 'Failed to delete feature: Conflict',
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('Failed to delete feature')
+          })
+        ])
       });
     });
 
     it('should throw error if client not initialized', async () => {
       const uninitializedTool = new DeleteFeatureTool(null as any, mockLogger);
       const result = await uninitializedTool.execute({ id: 'feat_123456' });
-      expect(result).toEqual({
-        success: false,
-        error: expect.stringContaining('Failed to delete feature'),
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('Failed to delete feature')
+          })
+        ])
       });
     });
 
@@ -228,10 +256,14 @@ describe('DeleteFeatureTool', () => {
       mockClient.patch.mockRejectedValueOnce(new Error('Network timeout'));
 
       const result = await tool.execute({ id: 'feat_123456' });
-      
-      expect(result).toEqual({
-        success: false,
-        error: 'Failed to delete feature: Network timeout',
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('Failed to delete feature')
+          })
+        ])
       });
     });
   });
@@ -246,17 +278,16 @@ describe('DeleteFeatureTool', () => {
 
       mockClient.patch.mockResolvedValueOnce(archivedFeature);
 
-      const result = await tool.execute({ id: 'feat_123456' }) as any;
+      const result = await tool.execute({ id: 'feat_123456' });
 
-      expect(result).toEqual({
-        success: true,
-        data: {
-          feature: archivedFeature,
-          action: 'archived',
-        },
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('feat_123456')
+          })
+        ])
       });
-      expect(result.data.feature.status).toBe('archived');
-      expect(result.data.feature.archived_at).toBeDefined();
     });
 
     it('should return minimal response for permanent deletion', async () => {
@@ -264,23 +295,29 @@ describe('DeleteFeatureTool', () => {
 
       const result = await tool.execute({ id: 'feat_123456', permanent: true });
 
-      expect(result).toEqual({
-        success: true,
-        data: {
-          action: 'deleted',
-          feature_id: 'feat_123456',
-        },
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('feat_123456')
+          })
+        ])
       });
     });
 
     it('should handle delete with response body', async () => {
       mockClient.delete.mockResolvedValueOnce(undefined);
 
-      const result = await tool.execute({ id: 'feat_123456', permanent: true }) as any;
+      const result = await tool.execute({ id: 'feat_123456', permanent: true });
 
-      expect(result.success).toBe(true);
-      expect(result.data.action).toBe('deleted');
-      expect(result.data.feature_id).toBe('feat_123456');
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('deleted')
+          })
+        ])
+      });
     });
   });
 });

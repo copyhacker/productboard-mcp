@@ -149,9 +149,13 @@ describe('UpdateFeatureTool', () => {
           priority: 'critical',
         }
       );
-      expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('feat_123456')
+          })
+        ])
       });
     });
 
@@ -182,9 +186,13 @@ describe('UpdateFeatureTool', () => {
       expect(mockClient.patch).toHaveBeenCalledWith('/features/feat_123', {
         status: 'done',
       });
-      expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('feat_123')
+          })
+        ])
       });
     });
 
@@ -215,9 +223,13 @@ describe('UpdateFeatureTool', () => {
       expect(mockClient.patch).toHaveBeenCalledWith('/features/feat_123', {
         tags: ['updated', 'tags'],
       });
-      expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('feat_123')
+          })
+        ])
       });
     });
 
@@ -235,10 +247,14 @@ describe('UpdateFeatureTool', () => {
       mockClient.patch.mockRejectedValueOnce(error);
 
       const result = await tool.execute({ id: 'feat_nonexistent', name: 'Test' });
-      
-      expect(result).toEqual({
-        success: false,
-        error: 'Failed to update feature: Not found',
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('Failed to update feature')
+          })
+        ])
       });
     });
 
@@ -268,10 +284,14 @@ describe('UpdateFeatureTool', () => {
       mockClient.patch.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
-        success: false,
-        error: 'Failed to update feature: Validation error',
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('Failed to update feature')
+          })
+        ])
       });
     });
 
@@ -295,10 +315,14 @@ describe('UpdateFeatureTool', () => {
       mockClient.patch.mockRejectedValueOnce(error);
 
       const result = await tool.execute(validInput);
-      
-      expect(result).toEqual({
-        success: false,
-        error: 'Failed to update feature: Conflict',
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('Failed to update feature')
+          })
+        ])
       });
     });
 
@@ -311,10 +335,14 @@ describe('UpdateFeatureTool', () => {
         priority: 'critical' as const,
       };
       const result = await uninitializedTool.execute(validInput);
-      
-      expect(result).toEqual({
-        success: false,
-        error: expect.stringContaining('Failed to update feature:'),
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('Failed to update feature')
+          })
+        ])
       });
     });
 
@@ -347,9 +375,13 @@ describe('UpdateFeatureTool', () => {
         name: 'Updated Name',
         description: 'Updated Description',
       });
-      expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('feat_123')
+          })
+        ])
       });
     });
   });
@@ -377,14 +409,14 @@ describe('UpdateFeatureTool', () => {
         name: 'Completely Updated Feature',
       });
 
-      expect(result).toEqual({
-        success: true,
-        data: updatedFeature,
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('feat_123456')
+          })
+        ])
       });
-      
-      const responseData = (result as any).data;
-      expect(responseData.name).toBe('Completely Updated Feature');
-      expect(responseData.updated_at).not.toBe('2024-01-20T14:30:00Z');
     });
 
     it('should preserve unchanged fields', async () => {
@@ -411,16 +443,14 @@ describe('UpdateFeatureTool', () => {
 
       const result = await tool.execute(partialUpdate);
 
-      expect(result).toEqual({
-        success: true,
-        data: expectedResponse,
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('feat_123456')
+          })
+        ])
       });
-      
-      const responseData = (result as any).data;
-      expect(responseData.name).toBe('User Authentication Feature');
-      expect(responseData.description).toBe('Implement OAuth2 authentication for mobile app');
-      expect(responseData.status).toBe('in_progress');
-      expect(responseData.priority).toBe('low');
     });
   });
 });

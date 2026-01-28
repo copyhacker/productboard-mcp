@@ -1,5 +1,5 @@
 import { ProductboardMCPServer, ServerDependencies } from '../../../src/core/server.js';
-import { Config } from '../../../src/utils/config.js';
+import { Config } from '../../../src/utils/types.js';
 
 jest.mock('@modelcontextprotocol/sdk/server/index.js');
 jest.mock('@modelcontextprotocol/sdk/server/stdio.js');
@@ -196,10 +196,8 @@ describe('ProductboardMCPServer', () => {
       await server.initialize();
 
       expect(mockDependencies.logger.info).toHaveBeenCalledWith('Initializing Productboard MCP Server...');
-      // In test mode, auth and API checks are skipped
-      expect(mockDependencies.logger.info).toHaveBeenCalledWith('Skipping authentication validation in test mode');
-      expect(mockDependencies.logger.info).toHaveBeenCalledWith('Skipping API connection test in test mode');
-      expect(mockDependencies.logger.info).toHaveBeenCalledWith('Skipping permission discovery in test mode');
+      // In test mode, auth and API checks are skipped silently (no log messages)
+      expect(mockDependencies.logger.info).toHaveBeenCalledWith('Registering Productboard tools...');
       expect(mockDependencies.logger.info).toHaveBeenCalledWith('Productboard MCP Server initialized successfully');
     });
 
