@@ -56,11 +56,24 @@ export class ListUsersTool extends BaseTool<ListUsersParams> {
       params: queryParams,
     });
 
+    // Response format: { data: [...], links: {...} }
+    const users = (response as any)?.data || [];
+
+    // Apply client-side filtering if search is provided
+    let filteredUsers = users;
+    if (params.search) {
+      const search = params.search.toLowerCase();
+      filteredUsers = users.filter((user: any) =>
+        user.name?.toLowerCase().includes(search) ||
+        user.email?.toLowerCase().includes(search)
+      );
+    }
+
     return {
       success: true,
       data: {
-        users: response,
-        total: Array.isArray(response) ? response.length : 0,
+        users: filteredUsers,
+        total: filteredUsers.length,
       },
     };
   }
