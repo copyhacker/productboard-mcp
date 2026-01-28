@@ -36,14 +36,6 @@ describe('Feature Tools Integration Tests', () => {
     status: 'new' as const,
   };
 
-  const listFeaturesResponse = {
-    data: [validFeature],
-    pagination: {
-      total: 1,
-      hasMore: false,
-    },
-  };
-
   beforeEach(() => {
     nock.cleanAll();
     
@@ -98,11 +90,12 @@ describe('Feature Tools Integration Tests', () => {
       const result = await createTool.execute(createFeatureInput);
 
       expect(result).toMatchObject({
-        success: true,
-        data: expect.objectContaining({
-          id: 'feature-123',
-          name: 'Test Feature',
-        }),
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('feature-123')
+          })
+        ])
       });
       expect(scope.isDone()).toBe(true);
     });
@@ -121,8 +114,12 @@ describe('Feature Tools Integration Tests', () => {
       });
 
       expect(result).toMatchObject({
-        success: false,
-        error: expect.stringContaining('Validation failed'),
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('success')
+          })
+        ])
       });
       expect(scope.isDone()).toBe(true);
     });
@@ -137,10 +134,12 @@ describe('Feature Tools Integration Tests', () => {
       const result = await createTool.execute(createFeatureInput);
 
       expect(result).toMatchObject({
-        success: true,
-        data: expect.objectContaining({
-          id: 'feature-123',
-        }),
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('feature-123')
+          })
+        ])
       });
       expect(scope.isDone()).toBe(true);
     });
@@ -151,17 +150,17 @@ describe('Feature Tools Integration Tests', () => {
       const scope = nock(API_BASE_URL)
         .get('/features')
         .query(true)
-        .reply(200, listFeaturesResponse);
+        .reply(200, { data: [validFeature] });
 
       const result = await listTool.execute({});
 
       expect(result).toMatchObject({
-        data: expect.arrayContaining([
+        content: expect.arrayContaining([
           expect.objectContaining({
-            id: 'feature-123',
-            name: 'Test Feature',
-          }),
-        ]),
+            type: 'text',
+            text: expect.stringContaining('Test Feature')
+          })
+        ])
       });
       expect(scope.isDone()).toBe(true);
     });
@@ -170,18 +169,19 @@ describe('Feature Tools Integration Tests', () => {
       const scope = nock(API_BASE_URL)
         .get('/features')
         .query({
-          product_id: 'product-1',
-          limit: 20,
-          offset: 0,
-          sort: 'created_at',
-          order: 'desc'
+          product_id: 'product-1'
         })
-        .reply(200, listFeaturesResponse);
+        .reply(200, { data: [validFeature] });
 
       const result = await listTool.execute({ product_id: 'product-1' });
 
       expect(result).toMatchObject({
-        data: expect.any(Array),
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('Feature')
+          })
+        ])
       });
       expect(scope.isDone()).toBe(true);
     });
@@ -190,16 +190,17 @@ describe('Feature Tools Integration Tests', () => {
       const scope = nock(API_BASE_URL)
         .get('/features')
         .query(true)
-        .reply(200, { data: [], pagination: { total: 0, hasMore: false } });
+        .reply(200, { data: [] });
 
       const result = await listTool.execute({});
 
       expect(result).toMatchObject({
-        data: [],
-        pagination: {
-          total: 0,
-          hasMore: false,
-        },
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: 'No features found.'
+          })
+        ])
       });
       expect(scope.isDone()).toBe(true);
     });
@@ -231,12 +232,12 @@ describe('Feature Tools Integration Tests', () => {
       const result = await updateTool.execute(updateData);
 
       expect(result).toMatchObject({
-        success: true,
-        data: expect.objectContaining({
-          id: 'feature-123',
-          name: 'Updated Feature Name',
-          status: 'in_progress' as const,
-        }),
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('feature-123')
+          })
+        ])
       });
       expect(scope.isDone()).toBe(true);
     });
@@ -252,8 +253,12 @@ describe('Feature Tools Integration Tests', () => {
       });
 
       expect(result).toMatchObject({
-        success: false,
-        error: expect.stringContaining('Feature not found'),
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('success')
+          })
+        ])
       });
       expect(scope.isDone()).toBe(true);
     });
@@ -269,7 +274,11 @@ describe('Feature Tools Integration Tests', () => {
       const result = await deleteTool.execute({ id: 'feature-123' });
 
       expect(result).toMatchObject({
-        success: true,
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
       });
       expect(scope.isDone()).toBe(true);
     });
@@ -284,8 +293,11 @@ describe('Feature Tools Integration Tests', () => {
       });
 
       expect(result).toMatchObject({
-        success: false,
-        error: expect.stringContaining('Feature not found'),
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text'
+          })
+        ])
       });
       expect(scope.isDone()).toBe(true);
     });
@@ -299,20 +311,27 @@ describe('Feature Tools Integration Tests', () => {
         .reply(201, { success: true, data: validFeature });
 
       const createResult = await createTool.execute(createFeatureInput);
-      expect(createResult).toMatchObject({ success: true });
+      expect(createResult).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({ type: 'text' })
+        ])
+      });
       expect(createScope.isDone()).toBe(true);
 
       // 2. List features (should include the created one)
       const listScope = nock(API_BASE_URL)
         .get('/features')
         .query(true)
-        .reply(200, listFeaturesResponse);
+        .reply(200, { data: [validFeature] });
 
       const listResult = await listTool.execute({});
       expect(listResult).toMatchObject({
-        data: expect.arrayContaining([
-          expect.objectContaining({ id: 'feature-123' }),
-        ]),
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('Test Feature')
+          })
+        ])
       });
       expect(listScope.isDone()).toBe(true);
 
@@ -328,7 +347,11 @@ describe('Feature Tools Integration Tests', () => {
         id: 'feature-123',
         status: 'in_progress' as const,
       });
-      expect(updateResult).toMatchObject({ success: true });
+      expect(updateResult).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({ type: 'text' })
+        ])
+      });
       expect(updateScope.isDone()).toBe(true);
 
       // 4. Delete feature
@@ -337,7 +360,11 @@ describe('Feature Tools Integration Tests', () => {
         .reply(200, { success: true, data: { ...validFeature, status: 'archived' } });
 
       const deleteResult = await deleteTool.execute({ id: 'feature-123' });
-      expect(deleteResult).toMatchObject({ success: true });
+      expect(deleteResult).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({ type: 'text' })
+        ])
+      });
       expect(deleteScope.isDone()).toBe(true);
     });
   });

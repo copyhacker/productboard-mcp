@@ -261,12 +261,12 @@ describe('MCP Tools Comprehensive Integration', () => {
       });
 
       expect(listResult).toMatchObject({
-        data: expect.arrayContaining([
+        content: expect.arrayContaining([
           expect.objectContaining({
-            id: 'feature-123',
-            status: 'in_progress',
-          }),
-        ]),
+            type: 'text',
+            text: expect.stringContaining('Test Feature')
+          })
+        ])
       });
 
       // 5. Delete feature
