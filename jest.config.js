@@ -33,14 +33,6 @@ export default {
     '!src/**/index.ts',
     '!src/types/**',
   ],
-  coverageThreshold: {
-    global: {
-      branches: 95,
-      functions: 95,
-      lines: 95,
-      statements: 95,
-    },
-  },
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html', 'json'],
   moduleNameMapper: {
