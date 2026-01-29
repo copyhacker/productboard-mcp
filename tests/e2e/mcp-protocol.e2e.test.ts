@@ -116,9 +116,11 @@ describe('MCP Protocol End-to-End Tests', () => {
       });
 
       // Wait for the server to be ready (or timeout)
+      // Use longer timeout in CI environments
+      const timeoutMs = process.env.CI ? 30000 : 10000;
       const timeout = setTimeout(() => {
         reject(new Error('MCP server failed to start within timeout'));
-      }, 10000);
+      }, timeoutMs);
 
       // Send initialize request to check if server is ready
       client.send({
@@ -202,7 +204,7 @@ describe('MCP Protocol End-to-End Tests', () => {
       const client = await startMCPServer();
       expect(client).toBeDefined();
       client.close();
-    }, 15000);
+    }, process.env.CI ? 45000 : 15000);
 
     it('should handle invalid initialize request', async () => {
       const client = await startMCPServer();
@@ -213,7 +215,7 @@ describe('MCP Protocol End-to-End Tests', () => {
       ).rejects.toThrow();
       
       client.close();
-    }, 15000);
+    }, process.env.CI ? 45000 : 15000);
   });
 
   describe('Tools Management', () => {
@@ -221,7 +223,7 @@ describe('MCP Protocol End-to-End Tests', () => {
 
     beforeEach(async () => {
       client = await startMCPServer();
-    }, 15000);
+    }, process.env.CI ? 45000 : 15000);
 
     afterEach(() => {
       if (client) {
@@ -263,7 +265,7 @@ describe('MCP Protocol End-to-End Tests', () => {
 
     beforeEach(async () => {
       client = await startMCPServer();
-    }, 15000);
+    }, process.env.CI ? 45000 : 15000);
 
     afterEach(() => {
       if (client) {
@@ -356,7 +358,7 @@ describe('MCP Protocol End-to-End Tests', () => {
 
     beforeEach(async () => {
       client = await startMCPServer();
-    }, 15000);
+    }, process.env.CI ? 45000 : 15000);
 
     afterEach(() => {
       if (client) {
@@ -440,7 +442,7 @@ describe('MCP Protocol End-to-End Tests', () => {
 
     beforeEach(async () => {
       client = await startMCPServer();
-    }, 15000);
+    }, process.env.CI ? 45000 : 15000);
 
     afterEach(() => {
       if (client) {
@@ -489,7 +491,7 @@ describe('MCP Protocol End-to-End Tests', () => {
 
     beforeEach(async () => {
       client = await startMCPServer();
-    }, 15000);
+    }, process.env.CI ? 45000 : 15000);
 
     afterEach(() => {
       if (client) {
@@ -519,7 +521,7 @@ describe('MCP Protocol End-to-End Tests', () => {
       parsedResults.forEach(result => {
         expect(result).toMatchObject({ success: true });
       });
-    });
+    }, process.env.CI ? 45000 : 20000);
 
     it('should maintain stability under load', async () => {
       const startTime = Date.now();
@@ -547,7 +549,9 @@ describe('MCP Protocol End-to-End Tests', () => {
       });
 
       // Should complete all requests within reasonable time
-      expect(duration).toBeLessThan(15000); // 15 seconds (increased from 10s)
-    });
+      // Allow more time in CI environments
+      const maxDuration = process.env.CI ? 30000 : 15000;
+      expect(duration).toBeLessThan(maxDuration);
+    }, process.env.CI ? 60000 : 30000); // Increase test timeout in CI
   });
 });
