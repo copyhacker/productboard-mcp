@@ -1,5 +1,8 @@
 # Productboard MCP Server
 
+[![Test Suite](https://github.com/copyhacker/productboard-mcp/actions/workflows/test.yml/badge.svg)](https://github.com/copyhacker/productboard-mcp/actions/workflows/test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 ## Overview
 
 A **complete** Model Context Protocol (MCP) server that provides comprehensive integration with the Productboard API. This server enables AI assistants and other MCP clients to interact with Productboard through **49 specialized tools** covering 100% of major Productboard functionalities including features, products, customer feedback, users, OKRs, releases, webhooks, analytics, and more.
