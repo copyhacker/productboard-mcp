@@ -61,15 +61,13 @@ describe('ListReleasesTool', () => {
           limit: {
             type: 'number',
             minimum: 1,
-            maximum: 100,
-            default: 20,
+            maximum: 2000,
+            default: 100,
             description: 'Maximum number of releases to return',
           },
-          offset: {
-            type: 'number',
-            minimum: 0,
-            default: 0,
-            description: 'Number of releases to skip',
+          pageCursor: {
+            type: 'string',
+            description: 'Cursor for pagination to get next page',
           },
         },
       });
@@ -89,17 +87,12 @@ describe('ListReleasesTool', () => {
       await expect(tool.execute(input)).rejects.toThrow('Invalid parameters');
     });
 
-    it('should validate limit range', async () => {
+    it('should validate pageLimit range', async () => {
       const invalidMinLimit = { limit: 0 } as any;
       await expect(tool.execute(invalidMinLimit)).rejects.toThrow('Invalid parameters');
 
-      const invalidMaxLimit = { limit: 101 } as any;
+      const invalidMaxLimit = { limit: 2001 } as any;
       await expect(tool.execute(invalidMaxLimit)).rejects.toThrow('Invalid parameters');
-    });
-
-    it('should validate offset minimum', async () => {
-      const input = { offset: -1 } as any;
-      await expect(tool.execute(input)).rejects.toThrow('Invalid parameters');
     });
 
     it('should accept valid filters', () => {
@@ -109,7 +102,7 @@ describe('ListReleasesTool', () => {
         date_from: '2024-01-01',
         date_to: '2024-12-31',
         limit: 50,
-        offset: 10,
+        pageCursor: 'cursor_abc',
       };
       const validation = tool.validateParams(validInput);
       expect(validation.valid).toBe(true);
@@ -147,7 +140,9 @@ describe('ListReleasesTool', () => {
       expect(mockClient.makeRequest).toHaveBeenCalledWith({
         method: 'GET',
         endpoint: '/releases',
-        params: {},
+        params: {
+          pageLimit: 100,
+        },
       });
       expect(result).toEqual({
         content: [{
@@ -167,7 +162,7 @@ describe('ListReleasesTool', () => {
         date_from: '2024-01-01',
         date_to: '2024-12-31',
         limit: 50,
-        offset: 10,
+        pageCursor: 'cursor_abc',
       };
       const expectedResponse = {
         releases: [
@@ -181,10 +176,10 @@ describe('ListReleasesTool', () => {
           },
         ],
         total: 1,
-        limit: 50,
-        offset: 10,
+        pageLimit: 50,
+        pageCursor: 'cursor_abc',
       };
-      
+
       mockClient.makeRequest.mockResolvedValueOnce(expectedResponse);
 
       const result = await tool.execute(input);
@@ -197,8 +192,8 @@ describe('ListReleasesTool', () => {
           status: 'in_progress',
           date_from: '2024-01-01',
           date_to: '2024-12-31',
-          limit: 50,
-          offset: 10,
+          pageLimit: 50,
+          pageCursor: 'cursor_abc',
         },
       });
       expect(result).toEqual({
@@ -220,10 +215,9 @@ describe('ListReleasesTool', () => {
       const expectedResponse = {
         releases: [],
         total: 0,
-        limit: 10,
-        offset: 0,
+        pageLimit: 10,
       };
-      
+
       mockClient.makeRequest.mockResolvedValueOnce(expectedResponse);
 
       const result = await tool.execute(input);
@@ -233,7 +227,7 @@ describe('ListReleasesTool', () => {
         endpoint: '/releases',
         params: {
           status: 'released',
-          limit: 10,
+          pageLimit: 10,
         },
       });
       expect(result).toEqual({

@@ -68,6 +68,7 @@ export class GlobalSearchTool extends BaseTool<GlobalSearchParams> {
           const featureResponse = await this.apiClient.makeRequest({
             method: 'GET',
             endpoint: '/features',
+            params: {},
           });
 
           if (featureResponse && (featureResponse as any).data) {
@@ -90,7 +91,6 @@ export class GlobalSearchTool extends BaseTool<GlobalSearchParams> {
           const productResponse = await this.apiClient.makeRequest({
             method: 'GET',
             endpoint: '/products',
-            params: { limit: 100 },
           });
 
           if (productResponse && (productResponse as any).data) {

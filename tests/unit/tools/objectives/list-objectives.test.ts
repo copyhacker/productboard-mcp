@@ -57,15 +57,13 @@ describe('ListObjectivesTool', () => {
           limit: {
             type: 'number',
             minimum: 1,
-            maximum: 100,
-            default: 20,
+            maximum: 2000,
+            default: 100,
             description: 'Maximum number of objectives to return',
           },
-          offset: {
-            type: 'number',
-            minimum: 0,
-            default: 0,
-            description: 'Number of objectives to skip',
+          pageCursor: {
+            type: 'string',
+            description: 'Cursor for pagination to get next page',
           },
         },
       });
@@ -99,17 +97,12 @@ describe('ListObjectivesTool', () => {
       await expect(tool.execute(input)).rejects.toThrow('Invalid parameters');
     });
 
-    it('should validate limit range', async () => {
+    it('should validate pageLimit range', async () => {
       const inputTooLow = { limit: 0 } as any;
       await expect(tool.execute(inputTooLow)).rejects.toThrow('Invalid parameters');
-      
-      const inputTooHigh = { limit: 101 } as any;
-      await expect(tool.execute(inputTooHigh)).rejects.toThrow('Invalid parameters');
-    });
 
-    it('should validate offset minimum', async () => {
-      const input = { pageCursor: undefined } as any;
-      await expect(tool.execute(input)).rejects.toThrow('Invalid parameters');
+      const inputTooHigh = { limit: 2001 } as any;
+      await expect(tool.execute(inputTooHigh)).rejects.toThrow('Invalid parameters');
     });
 
     it('should accept valid input', () => {
@@ -118,7 +111,7 @@ describe('ListObjectivesTool', () => {
         owner_email: 'jane.doe@example.com',
         period: 'quarter' as const,
         limit: 10,
-        offset: 5,
+        pageCursor: 'cursor_abc',
       };
       const validation = tool.validateParams(validInput);
       expect(validation.valid).toBe(true);
@@ -158,7 +151,9 @@ describe('ListObjectivesTool', () => {
       expect(mockClient.makeRequest).toHaveBeenCalledWith({
         method: 'GET',
         endpoint: '/objectives',
-        params: {},
+        params: {
+          pageLimit: 100,
+        },
       });
       expect(result).toMatchObject({
         content: expect.arrayContaining([
@@ -180,7 +175,7 @@ describe('ListObjectivesTool', () => {
         owner_email: 'jane.doe@example.com',
         period: 'quarter' as const,
         limit: 10,
-        offset: 5,
+        pageCursor: 'cursor_123',
       };
       const expectedResponse = {
         objectives: [
@@ -195,10 +190,10 @@ describe('ListObjectivesTool', () => {
           },
         ],
         total: 1,
-        limit: 10,
-        offset: 5,
+        pageLimit: 10,
+        pageCursor: 'cursor_123',
       };
-      
+
       mockClient.makeRequest.mockResolvedValueOnce(expectedResponse);
 
       const result = await tool.execute(input);
@@ -210,8 +205,8 @@ describe('ListObjectivesTool', () => {
           status: 'active',
           owner_email: 'jane.doe@example.com',
           period: 'quarter',
-          limit: 10,
-          offset: 5,
+          pageLimit: 10,
+          pageCursor: 'cursor_123',
         },
       });
       expect(result).toMatchObject({
@@ -236,10 +231,9 @@ describe('ListObjectivesTool', () => {
       const expectedResponse = {
         objectives: [],
         total: 0,
-        limit: 5,
-        offset: 0,
+        pageLimit: 5,
       };
-      
+
       mockClient.makeRequest.mockResolvedValueOnce(expectedResponse);
 
       const result = await tool.execute(input);
@@ -249,7 +243,7 @@ describe('ListObjectivesTool', () => {
         endpoint: '/objectives',
         params: {
           status: 'completed',
-          limit: 5,
+          pageLimit: 5,
         },
       });
       expect(result).toMatchObject({

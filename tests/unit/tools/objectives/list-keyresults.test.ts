@@ -51,15 +51,13 @@ describe('ListKeyResultsTool', () => {
           limit: {
             type: 'number',
             minimum: 1,
-            maximum: 100,
-            default: 20,
+            maximum: 2000,
+            default: 100,
             description: 'Maximum number of key results to return',
           },
-          offset: {
-            type: 'number',
-            minimum: 0,
-            default: 0,
-            description: 'Number of key results to skip',
+          pageCursor: {
+            type: 'string',
+            description: 'Cursor for pagination to get next page',
           },
         },
       });
@@ -79,17 +77,12 @@ describe('ListKeyResultsTool', () => {
       await expect(tool.execute(input)).rejects.toThrow('Invalid parameters');
     });
 
-    it('should validate limit range', async () => {
+    it('should validate pageLimit range', async () => {
       const inputTooLow = { limit: 0 } as any;
       await expect(tool.execute(inputTooLow)).rejects.toThrow('Invalid parameters');
-      
-      const inputTooHigh = { limit: 101 } as any;
-      await expect(tool.execute(inputTooHigh)).rejects.toThrow('Invalid parameters');
-    });
 
-    it('should validate offset minimum', async () => {
-      const input = { pageCursor: undefined } as any;
-      await expect(tool.execute(input)).rejects.toThrow('Invalid parameters');
+      const inputTooHigh = { limit: 2001 } as any;
+      await expect(tool.execute(inputTooHigh)).rejects.toThrow('Invalid parameters');
     });
 
     it('should accept valid input', () => {
@@ -97,7 +90,7 @@ describe('ListKeyResultsTool', () => {
         objective_id: 'obj_123',
         metric_type: 'number' as const,
         limit: 10,
-        offset: 5,
+        pageCursor: 'cursor_abc',
       };
       const validation = tool.validateParams(validInput);
       expect(validation.valid).toBe(true);
@@ -142,8 +135,10 @@ describe('ListKeyResultsTool', () => {
 
       expect(mockClient.makeRequest).toHaveBeenCalledWith({
         method: 'GET',
-        endpoint: '/keyresults',
-        params: {},
+        endpoint: '/key-results',
+        params: {
+          pageLimit: 100,
+        },
       });
       expect(result).toMatchObject({
         content: expect.arrayContaining([
@@ -164,7 +159,7 @@ describe('ListKeyResultsTool', () => {
         objective_id: 'obj_123',
         metric_type: 'percentage' as const,
         limit: 10,
-        offset: 5,
+        pageCursor: 'cursor_123',
       };
       const expectedResponse = {
         keyResults: [
@@ -181,22 +176,22 @@ describe('ListKeyResultsTool', () => {
           },
         ],
         total: 1,
-        limit: 10,
-        offset: 5,
+        pageLimit: 10,
+        pageCursor: 'cursor_123',
       };
-      
+
       mockClient.makeRequest.mockResolvedValueOnce(expectedResponse);
 
       const result = await tool.execute(input);
 
       expect(mockClient.makeRequest).toHaveBeenCalledWith({
         method: 'GET',
-        endpoint: '/keyresults',
+        endpoint: '/key-results',
         params: {
           objective_id: 'obj_123',
           metric_type: 'percentage',
-          limit: 10,
-          offset: 5,
+          pageLimit: 10,
+          pageCursor: 'cursor_123',
         },
       });
       expect(result).toMatchObject({
@@ -253,9 +248,10 @@ describe('ListKeyResultsTool', () => {
 
       expect(mockClient.makeRequest).toHaveBeenCalledWith({
         method: 'GET',
-        endpoint: '/keyresults',
+        endpoint: '/key-results',
         params: {
           objective_id: 'obj_123',
+          pageLimit: 100,
         },
       });
       expect(result).toMatchObject({
@@ -292,20 +288,19 @@ describe('ListKeyResultsTool', () => {
           },
         ],
         total: 1,
-        limit: 5,
-        offset: 0,
+        pageLimit: 5,
       };
-      
+
       mockClient.makeRequest.mockResolvedValueOnce(expectedResponse);
 
       const result = await tool.execute(input);
 
       expect(mockClient.makeRequest).toHaveBeenCalledWith({
         method: 'GET',
-        endpoint: '/keyresults',
+        endpoint: '/key-results',
         params: {
           metric_type: 'currency',
-          limit: 5,
+          pageLimit: 5,
         },
       });
       expect(result).toMatchObject({

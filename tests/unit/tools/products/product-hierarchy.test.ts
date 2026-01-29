@@ -33,28 +33,16 @@ describe('ProductHierarchyTool', () => {
   describe('constructor', () => {
     it('should initialize with correct name and description', () => {
       expect(tool.name).toBe('pb_product_hierarchy');
-      expect(tool.description).toBe('Get the complete product hierarchy tree');
+      expect(tool.description).toBe('Get the product hierarchy with components');
     });
 
     it('should define correct parameters schema', () => {
       expect(tool.parameters).toMatchObject({
         type: 'object',
         properties: {
-          product_id: {
+          productId: {
             type: 'string',
-            description: 'Root product ID (optional, defaults to all top-level products)',
-          },
-          depth: {
-            type: 'integer',
-            minimum: 1,
-            maximum: 5,
-            default: 3,
-            description: 'Maximum depth of hierarchy to retrieve',
-          },
-          include_features: {
-            type: 'boolean',
-            default: false,
-            description: 'Include features at each level',
+            description: 'Specific product ID to get hierarchy for (optional, defaults to all products)',
           },
         },
       });
@@ -62,40 +50,50 @@ describe('ProductHierarchyTool', () => {
   });
 
   describe('execute', () => {
-    const mockHierarchy = {
-      products: [
-        {
-          id: 'prod-1',
-          name: 'Product A',
-          level: 0,
-          children: [
-            {
-              id: 'sub-1',
-              name: 'Sub Product 1',
-              level: 1,
-              parent_id: 'prod-1',
-              children: [],
-            },
-          ],
-        },
-        {
-          id: 'prod-2',
-          name: 'Product B',
-          level: 0,
-          children: [],
-        },
-      ],
-    };
+    const mockProducts = [
+      {
+        id: 'prod-1',
+        name: 'Product A',
+        description: 'Main product',
+        owner: { email: 'owner@example.com' },
+      },
+      {
+        id: 'prod-2',
+        name: 'Product B',
+        description: 'Another product',
+      },
+    ];
 
-    it('should retrieve full hierarchy with default parameters', async () => {
-      (mockApiClient.get as jest.Mock).mockResolvedValue(mockHierarchy);
+    const mockComponents = [
+      {
+        id: 'comp-1',
+        name: 'Component 1',
+        description: 'Component for Product A',
+        parent: { product: { id: 'prod-1' } },
+        owner: { email: 'comp-owner@example.com' },
+      },
+      {
+        id: 'comp-2',
+        name: 'Component 2',
+        parent: { product: { id: 'prod-1' } },
+      },
+      {
+        id: 'comp-3',
+        name: 'Component 3',
+        parent: { product: { id: 'prod-2' } },
+      },
+    ];
+
+    it('should retrieve full hierarchy with all products', async () => {
+      (mockApiClient.get as jest.Mock)
+        .mockResolvedValueOnce({ data: mockProducts })
+        .mockResolvedValueOnce({ data: mockComponents });
 
       const result = await tool.execute({});
 
-      expect(mockApiClient.get).toHaveBeenCalledWith(
-        '/products/hierarchy',
-        { depth: 3 }
-      );
+      expect(mockApiClient.get).toHaveBeenCalledWith('/products');
+      expect(mockApiClient.get).toHaveBeenCalledWith('/components');
+      expect(mockApiClient.get).toHaveBeenCalledTimes(2);
 
       expect(result).toMatchObject({
         content: expect.arrayContaining([
@@ -104,26 +102,27 @@ describe('ProductHierarchyTool', () => {
           })
         ])
       });
-      const resultData = JSON.parse((result as any).content[0].text);
-      expect(resultData.success).toBe(true);
-      expect(resultData.data.products).toHaveLength(2);
 
-      expect(mockLogger.info).toHaveBeenCalledWith('Getting product hierarchy');
+      const text = (result as any).content[0].text;
+      expect(text).toContain('Product Hierarchy (2 products)');
+      expect(text).toContain('Product A');
+      expect(text).toContain('Product B');
+      expect(text).toContain('Component 1');
+      expect(text).toContain('Component 2');
+      expect(text).toContain('Component 3');
+
+      expect(mockLogger.info).toHaveBeenCalledWith('Building product hierarchy');
     });
 
     it('should retrieve hierarchy for specific product', async () => {
-      const singleProductHierarchy = {
-        products: [mockHierarchy.products[0]],
-      };
+      (mockApiClient.get as jest.Mock)
+        .mockResolvedValueOnce({ data: mockProducts })
+        .mockResolvedValueOnce({ data: mockComponents });
 
-      (mockApiClient.get as jest.Mock).mockResolvedValue(singleProductHierarchy);
+      const result = await tool.execute({ productId: 'prod-1' });
 
-      const result = await tool.execute({ product_id: 'prod-1' });
-
-      expect(mockApiClient.get).toHaveBeenCalledWith(
-        '/products/hierarchy',
-        { product_id: 'prod-1', depth: 3 }
-      );
+      expect(mockApiClient.get).toHaveBeenCalledWith('/products');
+      expect(mockApiClient.get).toHaveBeenCalledWith('/components');
 
       expect(result).toMatchObject({
         content: expect.arrayContaining([
@@ -132,77 +131,45 @@ describe('ProductHierarchyTool', () => {
           })
         ])
       });
-      const resultData = JSON.parse((result as any).content[0].text);
-      expect(resultData.success).toBe(true);
-      expect(resultData.data.products).toHaveLength(1);
-      expect(resultData.data.products[0].id).toBe('prod-1');
+
+      const text = (result as any).content[0].text;
+      expect(text).toContain('Product Hierarchy (1 products)');
+      expect(text).toContain('Product A');
+      expect(text).not.toContain('Product B');
+      expect(text).toContain('Component 1');
+      expect(text).toContain('Component 2');
+      expect(text).not.toContain('Component 3');
     });
 
-    it('should respect custom depth parameter', async () => {
-      (mockApiClient.get as jest.Mock).mockResolvedValue(mockHierarchy);
+    it('should handle product not found', async () => {
+      (mockApiClient.get as jest.Mock)
+        .mockResolvedValueOnce({ data: mockProducts })
+        .mockResolvedValueOnce({ data: mockComponents });
 
-      await tool.execute({ depth: 5 });
-
-      expect(mockApiClient.get).toHaveBeenCalledWith(
-        '/products/hierarchy',
-        { depth: 5 }
-      );
-    });
-
-    it('should include features when requested', async () => {
-      const hierarchyWithFeatures = {
-        products: [
-          {
-            ...mockHierarchy.products[0],
-            features: [
-              { id: 'feat-1', name: 'Feature 1' },
-              { id: 'feat-2', name: 'Feature 2' },
-            ],
-            children: [
-              {
-                ...mockHierarchy.products[0].children[0],
-                features: [
-                  { id: 'feat-3', name: 'Feature 3' },
-                ],
-              },
-            ],
-          },
-        ],
-      };
-
-      (mockApiClient.get as jest.Mock).mockResolvedValue(hierarchyWithFeatures);
-
-      const result = await tool.execute({ include_features: true });
-
-      expect(mockApiClient.get).toHaveBeenCalledWith(
-        '/products/hierarchy',
-        { depth: 3, include_features: true }
-      );
+      const result = await tool.execute({ productId: 'non-existent' });
 
       expect(result).toMatchObject({
         content: expect.arrayContaining([
           expect.objectContaining({
-            type: 'text'
+            type: 'text',
+            text: 'Product not found: non-existent'
           })
         ])
       });
-      const resultData = JSON.parse((result as any).content[0].text);
-      expect(resultData.success).toBe(true);
-      expect(resultData.data.products[0]).toHaveProperty('features');
-      expect(resultData.data.products[0].features).toHaveLength(2);
-      expect(resultData.data.products[0].children[0]).toHaveProperty('features');
     });
 
-    it('should validate depth parameter range', async () => {
-      const invalidParams = { depth: 0 } as any;
-      await expect(tool.execute(invalidParams)).rejects.toThrow('Invalid parameters for tool pb_product_hierarchy');
+    it('should handle products without components', async () => {
+      const productsWithoutComponents = [
+        {
+          id: 'prod-lonely',
+          name: 'Lonely Product',
+          description: 'No components',
+        },
+      ];
 
-      const tooDeepParams = { depth: 6 } as any;
-      await expect(tool.execute(tooDeepParams)).rejects.toThrow('Invalid parameters for tool pb_product_hierarchy');
-    });
-
-    it('should handle empty hierarchy', async () => {
-      (mockApiClient.get as jest.Mock).mockResolvedValue({ products: [] });
+      (mockApiClient.get as jest.Mock)
+        .mockResolvedValueOnce({ data: productsWithoutComponents })
+        .mockResolvedValueOnce({ data: [] });
 
       const result = await tool.execute({});
 
@@ -213,15 +180,56 @@ describe('ProductHierarchyTool', () => {
           })
         ])
       });
-      const resultData = JSON.parse((result as any).content[0].text);
-      expect(resultData.success).toBe(true);
-      expect(resultData.data.products).toEqual([]);
+
+      const text = (result as any).content[0].text;
+      expect(text).toContain('Lonely Product');
+      expect(text).toContain('Components: None');
     });
 
-    it('should handle API errors', async () => {
-      (mockApiClient.get as jest.Mock).mockRejectedValue(new Error('API Error'));
+    it('should handle empty product list', async () => {
+      (mockApiClient.get as jest.Mock)
+        .mockResolvedValueOnce({ data: [] })
+        .mockResolvedValueOnce({ data: [] });
 
-      await expect(tool.execute({})).rejects.toThrow('Tool pb_product_hierarchy execution failed: API Error');
+      const result = await tool.execute({});
+
+      expect(result).toMatchObject({
+        content: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'text',
+            text: 'No products found.'
+          })
+        ])
+      });
+    });
+
+    it('should include owner information when available', async () => {
+      (mockApiClient.get as jest.Mock)
+        .mockResolvedValueOnce({ data: mockProducts })
+        .mockResolvedValueOnce({ data: mockComponents });
+
+      const result = await tool.execute({ productId: 'prod-1' });
+
+      const text = (result as any).content[0].text;
+      expect(text).toContain('owner@example.com');
+      expect(text).toContain('comp-owner@example.com');
+    });
+
+    it('should format hierarchy text correctly', async () => {
+      (mockApiClient.get as jest.Mock)
+        .mockResolvedValueOnce({ data: [mockProducts[0]] })
+        .mockResolvedValueOnce({ data: [mockComponents[0]] });
+
+      const result = await tool.execute({ productId: 'prod-1' });
+
+      const text = (result as any).content[0].text;
+      // Check for proper formatting
+      expect(text).toMatch(/1\. Product A/);
+      expect(text).toMatch(/ID: prod-1/);
+      expect(text).toMatch(/Owner: owner@example\.com/);
+      expect(text).toMatch(/Description: Main product/);
+      expect(text).toMatch(/Components \(1\):/);
+      expect(text).toMatch(/1\. Component 1 \(comp-1\)/);
     });
   });
 });

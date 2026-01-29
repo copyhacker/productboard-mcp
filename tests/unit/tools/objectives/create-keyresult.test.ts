@@ -156,7 +156,7 @@ describe('CreateKeyResultTool', () => {
 
       const result = await tool.execute(validInput);
 
-      expect(mockClient.post).toHaveBeenCalledWith('/keyresults', validInput);
+      expect(mockClient.post).toHaveBeenCalledWith('/key-results', validInput);
       expect(result).toMatchObject({
         content: expect.arrayContaining([
           expect.objectContaining({
@@ -192,7 +192,7 @@ describe('CreateKeyResultTool', () => {
 
       const result = await tool.execute(minimalInput);
 
-      expect(mockClient.post).toHaveBeenCalledWith('/keyresults', minimalInput);
+      expect(mockClient.post).toHaveBeenCalledWith('/key-results', minimalInput);
       expect(result).toMatchObject({
         content: expect.arrayContaining([
           expect.objectContaining({
@@ -233,7 +233,7 @@ describe('CreateKeyResultTool', () => {
 
       const result = await tool.execute(validInput);
 
-      expect(mockClient.post).toHaveBeenCalledWith('/keyresults', validInput);
+      expect(mockClient.post).toHaveBeenCalledWith('/key-results', validInput);
       expect(result).toMatchObject({
         content: expect.arrayContaining([
           expect.objectContaining({
@@ -274,7 +274,7 @@ describe('CreateKeyResultTool', () => {
 
       const result = await tool.execute(validInput);
 
-      expect(mockClient.post).toHaveBeenCalledWith('/keyresults', validInput);
+      expect(mockClient.post).toHaveBeenCalledWith('/key-results', validInput);
       expect(result).toMatchObject({
         content: expect.arrayContaining([
           expect.objectContaining({

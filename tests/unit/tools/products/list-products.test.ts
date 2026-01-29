@@ -80,7 +80,6 @@ describe('ListProductsTool', () => {
       expect(mockApiClient.makeRequest).toHaveBeenCalledWith({
         method: 'GET',
         endpoint: '/products',
-        params: {},
       });
 
       expect(result).toMatchObject({
@@ -99,17 +98,22 @@ describe('ListProductsTool', () => {
     });
 
     it('should filter by parent_id', async () => {
-      const subProducts = [
+      const allProducts = [
         {
           id: 'sub-1',
           name: 'Sub Product 1',
-          parent_id: 'prod-1',
+          parent: { id: 'prod-1' },
+          archived: false,
+        },
+        {
+          id: 'prod-1',
+          name: 'Parent Product',
           archived: false,
         },
       ];
 
       mockApiClient.makeRequest.mockResolvedValue({
-        data: subProducts,
+        data: allProducts,
         links: {},
       });
 
@@ -118,7 +122,6 @@ describe('ListProductsTool', () => {
       expect(mockApiClient.makeRequest).toHaveBeenCalledWith({
         method: 'GET',
         endpoint: '/products',
-        params: {},
       });
 
       expect(result).toMatchObject({
@@ -152,7 +155,6 @@ describe('ListProductsTool', () => {
       expect(mockApiClient.makeRequest).toHaveBeenCalledWith({
         method: 'GET',
         endpoint: '/products',
-        params: {},
       });
 
       expect(result).toMatchObject({
@@ -188,7 +190,6 @@ describe('ListProductsTool', () => {
       expect(mockApiClient.makeRequest).toHaveBeenCalledWith({
         method: 'GET',
         endpoint: '/products',
-        params: {},
       });
 
       expect(result).toMatchObject({

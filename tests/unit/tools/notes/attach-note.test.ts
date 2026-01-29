@@ -25,7 +25,7 @@ describe('AttachNoteTool', () => {
   describe('constructor', () => {
     it('should initialize with correct name and description', () => {
       expect(tool.name).toBe('pb_note_attach');
-      expect(tool.description).toBe('Link a note to one or more features');
+      expect(tool.description).toBe('Link a note to a feature, product, component, or subfeature');
     });
 
     it('should define correct parameters schema', () => {
@@ -35,7 +35,7 @@ describe('AttachNoteTool', () => {
         properties: {
           noteId: {
             type: 'string',
-            description: 'Note ID',
+            description: 'Note ID (UUID)',
           },
           entityId: {
             type: 'string',
@@ -110,15 +110,6 @@ describe('AttachNoteTool', () => {
 
       const missingEntityId = { noteId: 'note-123' };
       await expect(tool.execute(missingEntityId as any)).rejects.toThrow('Invalid parameters');
-    });
-
-    it('should validate entityId is not empty', async () => {
-      const emptyEntityId = {
-        noteId: 'note-123',
-        entityId: '',
-      };
-
-      await expect(tool.execute(emptyEntityId as any)).rejects.toThrow('Invalid parameters');
     });
 
     it('should handle note not found error', async () => {

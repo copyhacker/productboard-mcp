@@ -146,7 +146,7 @@ describe('UpdateKeyResultTool', () => {
 
       const result = await tool.execute(validInput);
 
-      expect(mockClient.put).toHaveBeenCalledWith('/keyresults/kr_123', {
+      expect(mockClient.put).toHaveBeenCalledWith('/key-results/kr_123', {
         name: 'Updated Key Result',
         current_value: 7500,
         target_value: 15000,
@@ -187,7 +187,7 @@ describe('UpdateKeyResultTool', () => {
 
       const result = await tool.execute(validInput);
 
-      expect(mockClient.put).toHaveBeenCalledWith('/keyresults/kr_123', {
+      expect(mockClient.put).toHaveBeenCalledWith('/key-results/kr_123', {
         current_value: 8000,
       });
       expect(result).toMatchObject({
@@ -229,7 +229,7 @@ describe('UpdateKeyResultTool', () => {
 
       const result = await tool.execute(validInput);
 
-      expect(mockClient.put).toHaveBeenCalledWith('/keyresults/kr_123', {
+      expect(mockClient.put).toHaveBeenCalledWith('/key-results/kr_123', {
         metric_type: 'percentage',
         current_value: 85,
         target_value: 95,
@@ -274,7 +274,7 @@ describe('UpdateKeyResultTool', () => {
 
       const result = await tool.execute(validInput);
 
-      expect(mockClient.put).toHaveBeenCalledWith('/keyresults/kr_123', {
+      expect(mockClient.put).toHaveBeenCalledWith('/key-results/kr_123', {
         metric_type: 'currency',
         current_value: 75000,
         target_value: 120000,
