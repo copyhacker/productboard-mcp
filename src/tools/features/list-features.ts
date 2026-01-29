@@ -112,6 +112,14 @@ export class ListFeaturesTool extends BaseTool<ListFeaturesParams> {
 
     const response = await this.apiClient.get('/features', queryParams);
 
+    this.logger.debug('Raw API response structure', {
+      hasData: !!(response as any)?.data,
+      isArray: Array.isArray(response),
+      dataIsArray: Array.isArray((response as any)?.data),
+      dataLength: Array.isArray((response as any)?.data) ? (response as any).data.length : 0,
+      sampleKeys: (response as any)?.data?.[0] ? Object.keys((response as any).data[0]) : []
+    });
+
     // Extract feature data
     let features: any[] = [];
     if (response && (response as any).data) {
@@ -119,6 +127,17 @@ export class ListFeaturesTool extends BaseTool<ListFeaturesParams> {
     } else if (Array.isArray(response)) {
       features = response;
     }
+
+    this.logger.debug('Extracted features', {
+      count: features.length,
+      firstFeature: features[0] ? {
+        id: features[0].id,
+        hasName: !!features[0].name,
+        hasStatus: !!features[0].status,
+        hasOwner: !!features[0].owner,
+        allKeys: Object.keys(features[0])
+      } : null
+    });
 
     // Apply client-side filtering for parameters not supported by the API
     // Note: product_id and component_id are now handled by API-level filtering
@@ -212,6 +231,11 @@ export class ListFeaturesTool extends BaseTool<ListFeaturesParams> {
       createdAt: feature.createdAt,
       updatedAt: feature.updatedAt,
     }));
+
+    this.logger.debug('Formatted features for output', {
+      count: formattedFeatures.length,
+      sample: formattedFeatures[0]
+    });
     
     // Create a text summary of the features
     const summary = formattedFeatures.length > 0
