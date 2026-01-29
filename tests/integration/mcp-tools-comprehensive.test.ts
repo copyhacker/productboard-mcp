@@ -194,14 +194,11 @@ describe('MCP Tools Comprehensive Integration', () => {
         })
         .reply(200, { ...featureData, status: 'in_progress' });
 
-      // Mock feature listing
+      // Mock feature listing - match any query params
       nock(BASE_URL)
         .get('/features')
         .query(true)
-        .reply(200, {
-          data: [{ ...featureData, status: 'in_progress' }],
-          pagination: { hasMore: false }
-        });
+        .reply(200, [{ ...featureData, status: { name: 'in_progress' } }]);
 
       // Mock feature deletion (archive by default)
       nock(BASE_URL)
@@ -265,12 +262,12 @@ describe('MCP Tools Comprehensive Integration', () => {
       });
 
       expect(listResult).toMatchObject({
-        content: expect.arrayContaining([
-          expect.objectContaining({
+        content: [
+          {
             type: 'text',
             text: expect.stringContaining('Test Feature')
-          })
-        ])
+          }
+        ]
       });
 
       // 5. Delete feature
@@ -328,15 +325,17 @@ describe('MCP Tools Comprehensive Integration', () => {
         })
         .reply(201, childProduct);
 
-      // Mock hierarchy retrieval
+      // Mock hierarchy retrieval - now uses two endpoints
       nock(BASE_URL)
-        .get('/products/hierarchy')
-        .query({ depth: 3 })
+        .get('/products')
         .reply(200, {
-          products: [{
-            ...parentProduct,
-            children: [childProduct],
-          }],
+          data: [parentProduct, childProduct],
+        });
+
+      nock(BASE_URL)
+        .get('/components')
+        .reply(200, {
+          data: [],
         });
 
       // 1. Create parent product
@@ -373,9 +372,7 @@ describe('MCP Tools Comprehensive Integration', () => {
 
       // 3. Get hierarchy
       const hierarchyTool = registry.getTool('pb_product_hierarchy')!;
-      const hierarchyResult = await hierarchyTool.execute({
-        depth: 3,
-      });
+      const hierarchyResult = await hierarchyTool.execute({});
 
       expect(hierarchyResult).toMatchObject({
         content: expect.arrayContaining([
@@ -411,17 +408,15 @@ describe('MCP Tools Comprehensive Integration', () => {
         })
         .reply(201, noteData);
 
-      // Mock note attachment
+      // Mock note attachment - new single-entity linking endpoint
       nock(BASE_URL)
-        .post('/notes/note-123/attach', {
-          feature_ids: ['feature-123'],
-        })
+        .post('/notes/note-123/links/feature-123')
         .reply(200, { success: true });
 
       // Mock note listing
       nock(BASE_URL)
         .get('/notes')
-        .query({ feature_id: 'feature-123', limit: 20 })
+        .query({ featureId: 'feature-123', pageLimit: 100 })
         .reply(200, {
           data: [noteData],
           pagination: { hasMore: false }
@@ -446,23 +441,23 @@ describe('MCP Tools Comprehensive Integration', () => {
       // 2. Attach note to feature
       const attachTool = registry.getTool('pb_note_attach')!;
       const attachResult = await attachTool.execute({
-        note_id: 'note-123',
-        feature_ids: ['feature-123'],
+        noteId: 'note-123',
+        entityId: 'feature-123',
       });
 
       expect(attachResult).toMatchObject({
-        content: expect.arrayContaining([
-          expect.objectContaining({
+        content: [
+          {
             type: 'text',
-            text: expect.stringContaining('success')
-          })
-        ])
+            text: expect.stringContaining('Successfully')
+          }
+        ]
       });
 
       // 3. List notes for feature
       const listTool = registry.getTool('pb_note_list')!;
       const listResult = await listTool.execute({
-        feature_id: 'feature-123',
+        featureId: 'feature-123',
       });
 
       expect(listResult).toMatchObject({

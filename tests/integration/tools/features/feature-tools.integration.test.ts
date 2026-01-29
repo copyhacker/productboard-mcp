@@ -169,7 +169,8 @@ describe('Feature Tools Integration Tests', () => {
       const scope = nock(API_BASE_URL)
         .get('/features')
         .query({
-          product_id: 'product-1'
+          'parent.id': 'product-1',
+          pageLimit: 100
         })
         .reply(200, { data: [validFeature] });
 
