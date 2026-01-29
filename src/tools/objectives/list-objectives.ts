@@ -9,7 +9,7 @@ interface ListObjectivesParams {
   owner_email?: string;
   period?: 'quarter' | 'year';
   limit?: number;
-  offset?: number;
+  pageCursor?: string;
 }
 
 export class ListObjectivesTool extends BaseTool<ListObjectivesParams> {
@@ -38,15 +38,13 @@ export class ListObjectivesTool extends BaseTool<ListObjectivesParams> {
           limit: {
             type: 'number',
             minimum: 1,
-            maximum: 100,
-            default: 20,
+            maximum: 2000,
+            default: 100,
             description: 'Maximum number of objectives to return',
           },
-          offset: {
-            type: 'number',
-            minimum: 0,
-            default: 0,
-            description: 'Number of objectives to skip',
+          pageCursor: {
+            type: 'string',
+            description: 'Cursor for pagination to get next page',
           },
         },
       },
@@ -64,12 +62,13 @@ export class ListObjectivesTool extends BaseTool<ListObjectivesParams> {
     try {
       this.logger.info('Listing objectives');
 
-      const queryParams: Record<string, any> = {};
+      const queryParams: Record<string, any> = {
+        pageLimit: Math.min(params.limit || 100, 2000),
+      };
       if (params.status) queryParams.status = params.status;
       if (params.owner_email) queryParams.owner_email = params.owner_email;
       if (params.period) queryParams.period = params.period;
-      if (params.limit) queryParams.limit = params.limit;
-      if (params.offset) queryParams.offset = params.offset;
+      if (params.pageCursor) queryParams.pageCursor = params.pageCursor;
 
       const response = await this.apiClient.makeRequest({
         method: 'GET',

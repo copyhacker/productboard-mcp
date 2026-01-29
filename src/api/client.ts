@@ -70,7 +70,14 @@ export class ProductboardAPIClient {
         this.logger.debug('API Request', {
           method: config.method,
           url: config.url,
+          baseURL: config.baseURL,
           params: config.params,
+          headers: {
+            ...config.headers,
+            // Redact sensitive headers for logging
+            'X-Version': config.headers?.['X-Version'],
+            'Authorization': config.headers?.['Authorization'] ? '[REDACTED]' : undefined,
+          },
         });
         
         return config;
@@ -91,10 +98,21 @@ export class ProductboardAPIClient {
       },
       async (error: AxiosError) => {
         if (error.response) {
+          this.logger.error('API Error Response', {
+            status: error.response.status,
+            statusText: error.response.statusText,
+            url: error.config?.url,
+            method: error.config?.method,
+            params: error.config?.params,
+            data: error.response.data,
+          });
           const apiError = this.handleAPIError(error);
-          this.logger.error('API Error', apiError.toJSON());
           throw apiError;
         }
+        this.logger.error('API Request Failed', {
+          message: error.message,
+          code: error.code,
+        });
         throw error;
       },
     );
@@ -103,7 +121,18 @@ export class ProductboardAPIClient {
   private handleAPIError(error: AxiosError): ProductboardAPIError {
     const status = error.response?.status || 0;
     const data = error.response?.data as Record<string, unknown> | undefined;
-    const message = data?.message || error.message;
+
+    // Try to extract the most descriptive error message
+    let message = error.message;
+    if (data) {
+      if (data.message) {
+        message = String(data.message);
+      } else if (data.error) {
+        message = typeof data.error === 'string' ? data.error : JSON.stringify(data.error);
+      } else if (data.errors) {
+        message = typeof data.errors === 'string' ? data.errors : JSON.stringify(data.errors);
+      }
+    }
 
     switch (status) {
       case 400:

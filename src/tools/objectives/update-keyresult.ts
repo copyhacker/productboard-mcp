@@ -72,7 +72,7 @@ export class UpdateKeyResultTool extends BaseTool<UpdateKeyResultParams> {
         };
       }
 
-      const response = await this.apiClient.put(`/keyresults/${id}`, updateData);
+      const response = await this.apiClient.put(`/key-results/${id}`, updateData);
 
       return {
         success: true,

@@ -113,7 +113,7 @@ describe('GlobalSearchTool', () => {
       expect(mockApiClient.makeRequest).toHaveBeenCalledWith({
         method: 'GET',
         endpoint: '/features',
-        params: { limit: 100 },
+        params: {},
       });
 
       expect(result).toMatchObject({
@@ -166,7 +166,7 @@ describe('GlobalSearchTool', () => {
       expect(mockApiClient.makeRequest).toHaveBeenCalledWith({
         method: 'GET',
         endpoint: '/features',
-        params: { limit: 100 },
+        params: {},
       });
 
       expect(result).toMatchObject({
@@ -193,7 +193,7 @@ describe('GlobalSearchTool', () => {
       expect(mockApiClient.makeRequest).toHaveBeenCalledWith({
         method: 'GET',
         endpoint: '/features',
-        params: { limit: 100 },
+        params: {},
       });
 
       expect(result).toMatchObject({
@@ -272,7 +272,7 @@ describe('GlobalSearchTool', () => {
       expect(mockApiClient.makeRequest).toHaveBeenCalledWith({
         method: 'GET',
         endpoint: '/features',
-        params: { limit: 100 },
+        params: {},
       });
 
       expect(result).toMatchObject({

@@ -51,8 +51,13 @@ export abstract class BaseTool<TParams = unknown> implements Tool {
       return this.formatMCPResponse(result);
     } catch (error) {
       if (error instanceof Error) {
+        // Include details if available (e.g., from API errors)
+        let errorMessage = `Tool ${this.name} execution failed: ${error.message}`;
+        if ('details' in error && error.details) {
+          errorMessage += `\nDetails: ${JSON.stringify(error.details, null, 2)}`;
+        }
         throw new ToolExecutionError(
-          `Tool ${this.name} execution failed: ${error.message}`,
+          errorMessage,
           this.name,
           error,
         );

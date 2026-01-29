@@ -64,10 +64,10 @@ export class GlobalSearchTool extends BaseTool<GlobalSearchParams> {
       // Search features if requested
       if (searchTypes.includes('feature')) {
         try {
+          // Productboard API /features endpoint does not accept any query parameters
           const featureResponse = await this.apiClient.makeRequest({
             method: 'GET',
             endpoint: '/features',
-            params: { limit: 100 }, // Fetch more for better filtering
           });
 
           if (featureResponse && (featureResponse as any).data) {

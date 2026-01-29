@@ -46,22 +46,31 @@ export class ListProductsTool extends BaseTool<ListProductsParams> {
     try {
       this.logger.info('Listing products');
 
-      const queryParams: Record<string, any> = {};
-      if (params.parent_id) queryParams.parent_id = params.parent_id;
-      if (params.include_components) queryParams.include_components = params.include_components;
-      if (params.include_archived) queryParams.include_archived = params.include_archived;
-
+      // Note: Productboard API /products endpoint does not accept query parameters in v1
+      // All filtering must be done client-side
       const response = await this.apiClient.makeRequest({
         method: 'GET',
         endpoint: '/products',
-        params: queryParams,
       });
+
+      // Apply client-side filtering if requested
+      let products = Array.isArray((response as any).data) ? (response as any).data : [];
+
+      if (params.parent_id) {
+        products = products.filter((p: any) => p.parent?.id === params.parent_id);
+      }
+
+      if (!params.include_archived) {
+        products = products.filter((p: any) => !p.archived);
+      }
+
+      // Note: include_components doesn't need filtering - components are returned in the data
 
       return {
         success: true,
         data: {
-          products: Array.isArray((response as any).data) ? (response as any).data : [],
-          total: Array.isArray((response as any).data) ? (response as any).data.length : 0,
+          products: products,
+          total: products.length,
         },
       };
     } catch (error) {

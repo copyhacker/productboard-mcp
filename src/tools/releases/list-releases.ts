@@ -10,7 +10,7 @@ interface ListReleasesParams {
   date_from?: string;
   date_to?: string;
   limit?: number;
-  offset?: number;
+  pageCursor?: string;
 }
 
 export class ListReleasesTool extends BaseTool<ListReleasesParams> {
@@ -43,15 +43,13 @@ export class ListReleasesTool extends BaseTool<ListReleasesParams> {
           limit: {
             type: 'number',
             minimum: 1,
-            maximum: 100,
-            default: 20,
+            maximum: 2000,
+            default: 100,
             description: 'Maximum number of releases to return',
           },
-          offset: {
-            type: 'number',
-            minimum: 0,
-            default: 0,
-            description: 'Number of releases to skip',
+          pageCursor: {
+            type: 'string',
+            description: 'Cursor for pagination to get next page',
           },
         },
       },
@@ -69,13 +67,14 @@ export class ListReleasesTool extends BaseTool<ListReleasesParams> {
     try {
       this.logger.info('Listing releases');
 
-      const queryParams: Record<string, any> = {};
+      const queryParams: Record<string, any> = {
+        pageLimit: Math.min(params.limit || 100, 2000),
+      };
       if (params.release_group_id) queryParams.release_group_id = params.release_group_id;
       if (params.status) queryParams.status = params.status;
       if (params.date_from) queryParams.date_from = params.date_from;
       if (params.date_to) queryParams.date_to = params.date_to;
-      if (params.limit) queryParams.limit = params.limit;
-      if (params.offset) queryParams.offset = params.offset;
+      if (params.pageCursor) queryParams.pageCursor = params.pageCursor;
 
       const response = await this.apiClient.makeRequest({
         method: 'GET',

@@ -31,17 +31,15 @@ describe('AttachNoteTool', () => {
     it('should define correct parameters schema', () => {
       expect(tool.parameters).toMatchObject({
         type: 'object',
-        required: ['note_id', 'feature_ids'],
+        required: ['noteId', 'entityId'],
         properties: {
-          note_id: {
+          noteId: {
             type: 'string',
             description: 'Note ID',
           },
-          feature_ids: {
-            type: 'array',
-            items: { type: 'string' },
-            minItems: 1,
-            description: 'Feature IDs to link the note to',
+          entityId: {
+            type: 'string',
+            description: 'Entity ID (UUID) to link the note to (feature, product, component, or subfeature)',
           },
         },
       });
@@ -50,12 +48,12 @@ describe('AttachNoteTool', () => {
 
   describe('execute', () => {
     const validParams = {
-      note_id: 'note-123',
-      feature_ids: ['feat-1', 'feat-2'],
+      noteId: 'note-123',
+      entityId: 'feat-1',
     };
 
     const mockResponse = {
-      note_id: 'note-123',
+      noteId: 'note-123',
       attached_features: ['feat-1', 'feat-2'],
       total_attachments: 2,
     };
@@ -70,81 +68,65 @@ describe('AttachNoteTool', () => {
 
       expect(mockApiClient.makeRequest).toHaveBeenCalledWith({
         method: 'POST',
-        endpoint: '/notes/note-123/attach',
-        data: { feature_ids: ['feat-1', 'feat-2'] },
+        endpoint: '/notes/note-123/links/feat-1',
       });
 
       expect(result).toEqual({
         content: [
           {
             type: 'text',
-            text: JSON.stringify({
-              success: true,
-              data: {
-                data: mockResponse,
-                links: {},
-              },
-            }, null, 2),
+            text: 'Successfully linked note note-123 to entity feat-1'
           },
         ],
       });
 
       expect(mockLogger.info).toHaveBeenCalledWith(
-        'Attaching note to features',
-        { noteId: 'note-123', featureCount: 2 }
+        'Linking note to entity',
+        { noteId: 'note-123', entityId: 'feat-1', entityType: 'unknown' }
       );
     });
 
     it('should attach note to single feature', async () => {
       const singleFeatureParams = {
-        note_id: 'note-456',
-        feature_ids: ['feat-single'],
+        noteId: 'note-456',
+        entityId: 'feat-single',
       };
 
-      mockApiClient.makeRequest.mockResolvedValue({
-        data: {
-          note_id: 'note-456',
-          attached_features: ['feat-single'],
-          total_attachments: 1,
-        },
-        links: {},
-      });
+      mockApiClient.makeRequest.mockResolvedValue({});
 
       const result = await tool.execute(singleFeatureParams);
 
       expect(mockApiClient.makeRequest).toHaveBeenCalledWith({
         method: 'POST',
-        endpoint: '/notes/note-456/attach',
-        data: { feature_ids: ['feat-single'] },
+        endpoint: '/notes/note-456/links/feat-single',
       });
 
-      const parsedResult = JSON.parse((result as any).content[0].text);
-      expect(parsedResult.data.data.total_attachments).toBe(1);
+      expect((result as any).content[0].text).toContain('Successfully linked note note-456 to entity feat-single');
     });
 
     it('should validate required parameters', async () => {
-      const missingNoteId = { feature_ids: ['feat-1'] };
+      const missingNoteId = { entityId: 'feat-1' };
       await expect(tool.execute(missingNoteId as any)).rejects.toThrow('Invalid parameters');
 
-      const missingFeatureIds = { note_id: 'note-123' };
-      await expect(tool.execute(missingFeatureIds as any)).rejects.toThrow('Invalid parameters');
+      const missingEntityId = { noteId: 'note-123' };
+      await expect(tool.execute(missingEntityId as any)).rejects.toThrow('Invalid parameters');
     });
 
-    it('should validate feature_ids is not empty', async () => {
-      const emptyFeatures = {
-        note_id: 'note-123',
-        feature_ids: [],
+    it('should validate entityId is not empty', async () => {
+      const emptyEntityId = {
+        noteId: 'note-123',
+        entityId: '',
       };
 
-      await expect(tool.execute(emptyFeatures)).rejects.toThrow('Invalid parameters');
+      await expect(tool.execute(emptyEntityId as any)).rejects.toThrow('Invalid parameters');
     });
 
     it('should handle note not found error', async () => {
       mockApiClient.makeRequest.mockRejectedValue(new Error('Note not found'));
 
       await expect(tool.execute({
-        note_id: 'non-existent-note',
-        feature_ids: ['feat-1'],
+        noteId: 'non-existent-note',
+        entityId: 'feat-1',
       })).rejects.toThrow('Tool pb_note_attach execution failed');
     });
 
@@ -154,42 +136,17 @@ describe('AttachNoteTool', () => {
       );
 
       await expect(tool.execute({
-        note_id: 'note-123',
-        feature_ids: ['non-existent-feature'],
+        noteId: 'note-123',
+        entityId: 'non-existent-feature',
       })).rejects.toThrow('Tool pb_note_attach execution failed');
     });
 
-    it('should handle already attached features', async () => {
-      mockApiClient.makeRequest.mockResolvedValue({
-        data: {
-          note_id: 'note-123',
-          attached_features: ['feat-1', 'feat-2'],
-          already_attached: ['feat-1'],
-          newly_attached: ['feat-2'],
-          total_attachments: 2,
-        },
-        links: {},
-      });
-
-      const result = await tool.execute(validParams);
-
-      const parsedResult = JSON.parse((result as any).content[0].text);
-      expect(parsedResult.success).toBe(true);
-      expect(parsedResult.data.data).toHaveProperty('already_attached');
-      expect(parsedResult.data.data).toHaveProperty('newly_attached');
-    });
-
-    it('should handle attachment limit error', async () => {
-      const manyFeatures = {
-        note_id: 'note-123',
-        feature_ids: Array(101).fill('feat').map((_, i) => `feat-${i}`),
-      };
-
+    it('should handle API errors gracefully', async () => {
       mockApiClient.makeRequest.mockRejectedValue(
-        new Error('Cannot attach note to more than 100 features')
+        new Error('API error')
       );
 
-      await expect(tool.execute(manyFeatures)).rejects.toThrow('Tool pb_note_attach execution failed');
+      await expect(tool.execute(validParams)).rejects.toThrow('Tool pb_note_attach execution failed');
     });
   });
 });

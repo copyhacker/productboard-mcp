@@ -136,7 +136,7 @@ describe('ListReleasesTool', () => {
           },
         ],
         total: 2,
-        limit: 20,
+        pageLimit: 100,
         offset: 0,
       };
       
@@ -311,7 +311,7 @@ describe('ListReleasesTool', () => {
           },
         ],
         total: 1,
-        limit: 20,
+        pageLimit: 100,
         offset: 0,
       };
 

@@ -66,7 +66,7 @@ export class CreateKeyResultTool extends BaseTool<CreateKeyResultParams> {
         objective_id: params.objective_id 
       });
 
-      const response = await this.apiClient.post('/keyresults', params);
+      const response = await this.apiClient.post('/key-results', params);
 
       return {
         success: true,

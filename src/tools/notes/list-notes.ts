@@ -4,13 +4,18 @@ import { Logger } from '@utils/logger.js';
 import { Permission, AccessLevel } from '@auth/permissions.js';
 
 interface ListNotesParams {
-  feature_id?: string;
-  customer_email?: string;
-  company_name?: string;
-  tags?: string[];
-  date_from?: string;
-  date_to?: string;
+  featureId?: string;
+  companyId?: string;
+  ownerEmail?: string;
+  anyTag?: string[];
+  allTags?: string[];
+  createdFrom?: string;
+  createdTo?: string;
+  updatedFrom?: string;
+  updatedTo?: string;
+  term?: string;
   limit?: number;
+  pageCursor?: string;
 }
 
 export class ListNotesTool extends BaseTool<ListNotesParams> {
@@ -21,38 +26,62 @@ export class ListNotesTool extends BaseTool<ListNotesParams> {
       {
         type: 'object',
         properties: {
-          feature_id: {
+          featureId: {
             type: 'string',
-            description: 'Filter notes linked to a specific feature',
+            description: 'Filter notes linked to a specific feature ID',
           },
-          customer_email: {
+          companyId: {
             type: 'string',
-            description: 'Filter by customer email',
+            description: 'Filter by company ID',
           },
-          company_name: {
+          ownerEmail: {
             type: 'string',
-            description: 'Filter by company',
+            description: 'Filter by note owner email',
           },
-          tags: {
+          anyTag: {
             type: 'array',
             items: { type: 'string' },
-            description: 'Filter by tags',
+            description: 'Filter by any of these tags (OR)',
           },
-          date_from: {
+          allTags: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'Filter by all of these tags (AND)',
+          },
+          term: {
+            type: 'string',
+            description: 'Full-text search term',
+          },
+          createdFrom: {
             type: 'string',
             format: 'date',
-            description: 'Filter notes created after this date',
+            description: 'Filter notes created after this date (YYYY-MM-DD)',
           },
-          date_to: {
+          createdTo: {
             type: 'string',
             format: 'date',
-            description: 'Filter notes created before this date',
+            description: 'Filter notes created before this date (YYYY-MM-DD)',
+          },
+          updatedFrom: {
+            type: 'string',
+            format: 'date',
+            description: 'Filter notes updated after this date (YYYY-MM-DD)',
+          },
+          updatedTo: {
+            type: 'string',
+            format: 'date',
+            description: 'Filter notes updated before this date (YYYY-MM-DD)',
           },
           limit: {
             type: 'integer',
             minimum: 1,
-            maximum: 100,
-            default: 20,
+            maximum: 2000,
+            default: 100,
+            description: 'Maximum number of notes to return',
+          },
+          pageCursor: {
+            type: 'string',
+            description: 'Cursor for pagination to get next page',
           },
         },
       },
@@ -70,15 +99,24 @@ export class ListNotesTool extends BaseTool<ListNotesParams> {
     this.logger.info('Listing notes');
 
     const queryParams: Record<string, any> = {
-      limit: params.limit || 20,
+      pageLimit: Math.min(params.limit || 100, 2000),
     };
-    
-    if (params.feature_id) queryParams.feature_id = params.feature_id;
-    if (params.customer_email) queryParams.customer_email = params.customer_email;
-    if (params.company_name) queryParams.company_name = params.company_name;
-    if (params.tags) queryParams.tags = params.tags;
-    if (params.date_from) queryParams.date_from = params.date_from;
-    if (params.date_to) queryParams.date_to = params.date_to;
+
+    if (params.featureId) queryParams.featureId = params.featureId;
+    if (params.companyId) queryParams.companyId = params.companyId;
+    if (params.ownerEmail) queryParams.ownerEmail = params.ownerEmail;
+    if (params.term) queryParams.term = params.term;
+    if (params.anyTag && params.anyTag.length > 0) {
+      queryParams.anyTag = params.anyTag.join(',');
+    }
+    if (params.allTags && params.allTags.length > 0) {
+      queryParams.allTags = params.allTags.join(',');
+    }
+    if (params.createdFrom) queryParams.createdFrom = params.createdFrom;
+    if (params.createdTo) queryParams.createdTo = params.createdTo;
+    if (params.updatedFrom) queryParams.updatedFrom = params.updatedFrom;
+    if (params.updatedTo) queryParams.updatedTo = params.updatedTo;
+    if (params.pageCursor) queryParams.pageCursor = params.pageCursor;
 
     const response = await this.apiClient.makeRequest({
       method: 'GET',

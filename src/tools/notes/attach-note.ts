@@ -4,28 +4,32 @@ import { Logger } from '@utils/logger.js';
 import { Permission, AccessLevel } from '@auth/permissions.js';
 
 interface AttachNoteParams {
-  note_id: string;
-  feature_ids: string[];
+  noteId: string;
+  entityId: string;
+  entityType?: 'feature' | 'subfeature' | 'product' | 'component';
 }
 
 export class AttachNoteTool extends BaseTool<AttachNoteParams> {
   constructor(apiClient: ProductboardAPIClient, logger: Logger) {
     super(
       'pb_note_attach',
-      'Link a note to one or more features',
+      'Link a note to a feature, product, component, or subfeature',
       {
         type: 'object',
-        required: ['note_id', 'feature_ids'],
+        required: ['noteId', 'entityId'],
         properties: {
-          note_id: {
+          noteId: {
             type: 'string',
-            description: 'Note ID',
+            description: 'Note ID (UUID)',
           },
-          feature_ids: {
-            type: 'array',
-            items: { type: 'string' },
-            minItems: 1,
-            description: 'Feature IDs to link the note to',
+          entityId: {
+            type: 'string',
+            description: 'Entity ID (UUID) to link the note to (feature, product, component, or subfeature)',
+          },
+          entityType: {
+            type: 'string',
+            enum: ['feature', 'subfeature', 'product', 'component'],
+            description: 'Type of entity being linked (for logging/clarity, not used in API call)',
           },
         },
       },
@@ -40,20 +44,26 @@ export class AttachNoteTool extends BaseTool<AttachNoteParams> {
   }
 
   protected async executeInternal(params: AttachNoteParams): Promise<unknown> {
-    this.logger.info('Attaching note to features', {
-      noteId: params.note_id,
-      featureCount: params.feature_ids.length,
+    this.logger.info('Linking note to entity', {
+      noteId: params.noteId,
+      entityId: params.entityId,
+      entityType: params.entityType || 'unknown',
     });
 
-    const response = await this.apiClient.makeRequest({
+    // API endpoint: POST /notes/{noteId}/links/{entityId}
+    // Links one note to one entity (feature, product, component, or subfeature)
+    await this.apiClient.makeRequest({
       method: 'POST',
-      endpoint: `/notes/${params.note_id}/attach`,
-      data: { feature_ids: params.feature_ids },
+      endpoint: `/notes/${params.noteId}/links/${params.entityId}`,
     });
 
     return {
-      success: true,
-      data: response,
+      content: [
+        {
+          type: 'text',
+          text: `Successfully linked note ${params.noteId} to entity ${params.entityId}`
+        }
+      ]
     };
   }
 }

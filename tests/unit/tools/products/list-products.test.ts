@@ -118,7 +118,7 @@ describe('ListProductsTool', () => {
       expect(mockApiClient.makeRequest).toHaveBeenCalledWith({
         method: 'GET',
         endpoint: '/products',
-        params: { parent_id: 'prod-1' },
+        params: {},
       });
 
       expect(result).toMatchObject({
@@ -152,7 +152,7 @@ describe('ListProductsTool', () => {
       expect(mockApiClient.makeRequest).toHaveBeenCalledWith({
         method: 'GET',
         endpoint: '/products',
-        params: { include_components: true },
+        params: {},
       });
 
       expect(result).toMatchObject({
@@ -188,7 +188,7 @@ describe('ListProductsTool', () => {
       expect(mockApiClient.makeRequest).toHaveBeenCalledWith({
         method: 'GET',
         endpoint: '/products',
-        params: { include_archived: true },
+        params: {},
       });
 
       expect(result).toMatchObject({

@@ -108,7 +108,7 @@ describe('ListObjectivesTool', () => {
     });
 
     it('should validate offset minimum', async () => {
-      const input = { offset: -1 } as any;
+      const input = { pageCursor: undefined } as any;
       await expect(tool.execute(input)).rejects.toThrow('Invalid parameters');
     });
 
@@ -147,7 +147,7 @@ describe('ListObjectivesTool', () => {
           },
         ],
         total: 2,
-        limit: 20,
+        pageLimit: 100,
         offset: 0,
       };
       
@@ -376,7 +376,7 @@ describe('ListObjectivesTool', () => {
           },
         ],
         total: 1,
-        limit: 20,
+        pageLimit: 100,
         offset: 0,
       };
 
@@ -405,7 +405,7 @@ describe('ListObjectivesTool', () => {
       const apiResponse = {
         objectives: [],
         total: 0,
-        limit: 20,
+        pageLimit: 100,
         offset: 0,
       };
 

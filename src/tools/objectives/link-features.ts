@@ -5,28 +5,26 @@ import { ToolExecutionResult } from '../../core/types.js';
 import { Permission, AccessLevel } from '../../auth/permissions.js';
 
 interface LinkFeaturesToObjectiveParams {
-  objective_id: string;
-  feature_ids: string[];
+  featureId: string;
+  objectiveId: string;
 }
 
 export class LinkFeaturesToObjectiveTool extends BaseTool<LinkFeaturesToObjectiveParams> {
   constructor(apiClient: ProductboardAPIClient, logger: Logger) {
     super(
       'pb_objective_link_feature',
-      'Link features to an objective',
+      'Link a feature to an objective',
       {
         type: 'object',
-        required: ['objective_id', 'feature_ids'],
+        required: ['featureId', 'objectiveId'],
         properties: {
-          objective_id: {
+          featureId: {
             type: 'string',
-            description: 'Objective ID',
+            description: 'Feature ID (UUID)',
           },
-          feature_ids: {
-            type: 'array',
-            items: { type: 'string' },
-            minItems: 1,
-            description: 'Feature IDs to link',
+          objectiveId: {
+            type: 'string',
+            description: 'Objective ID (UUID)',
           },
         },
       },
@@ -42,25 +40,25 @@ export class LinkFeaturesToObjectiveTool extends BaseTool<LinkFeaturesToObjectiv
 
   protected async executeInternal(params: LinkFeaturesToObjectiveParams): Promise<ToolExecutionResult> {
     try {
-      this.logger.info('Linking features to objective', { 
-        objective_id: params.objective_id,
-        feature_count: params.feature_ids.length 
+      this.logger.info('Linking feature to objective', {
+        featureId: params.featureId,
+        objectiveId: params.objectiveId
       });
 
-      const response = await this.apiClient.post(`/objectives/${params.objective_id}/features`, {
-        feature_ids: params.feature_ids,
-      });
+      // API endpoint: POST /features/{id}/links/objectives/{objectiveId}
+      // Links one feature to one objective
+      const response = await this.apiClient.post(`/features/${params.featureId}/links/objectives/${params.objectiveId}`, {});
 
       return {
         success: true,
         data: response,
       };
     } catch (error) {
-      this.logger.error('Failed to link features to objective', error);
-      
+      this.logger.error('Failed to link feature to objective', error);
+
       return {
         success: false,
-        error: `Failed to link features to objective: ${(error as Error).message}`,
+        error: `Failed to link feature to objective: ${(error as Error).message}`,
       };
     }
   }

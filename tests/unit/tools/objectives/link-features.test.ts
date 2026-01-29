@@ -38,13 +38,13 @@ describe('LinkFeaturesToObjectiveTool', () => {
       const metadata = tool.getMetadata();
       expect(metadata.inputSchema).toMatchObject({
         type: 'object',
-        required: ['objective_id', 'feature_ids'],
+        required: ['objectiveId', 'featureId'],
         properties: {
-          objective_id: {
+          objectiveId: {
             type: 'string',
             description: 'Objective ID',
           },
-          feature_ids: {
+          featureId: {
             type: 'array',
             items: { type: 'string' },
             minItems: 1,
@@ -58,30 +58,30 @@ describe('LinkFeaturesToObjectiveTool', () => {
   describe('parameter validation', () => {
     it('should validate required fields', async () => {
       await expect(tool.execute({} as any)).rejects.toThrow('Invalid parameters');
-      await expect(tool.execute({ objective_id: 'obj_123' } as any)).rejects.toThrow('Invalid parameters');
-      await expect(tool.execute({ feature_ids: ['feat_123'] } as any)).rejects.toThrow('Invalid parameters');
+      await expect(tool.execute({ objectiveId: 'obj_123' } as any)).rejects.toThrow('Invalid parameters');
+      await expect(tool.execute({ featureId: ['feat_123'] } as any)).rejects.toThrow('Invalid parameters');
     });
 
-    it('should validate feature_ids array is not empty', async () => {
+    it('should validate featureId array is not empty', async () => {
       const input = {
-        objective_id: 'obj_123',
-        feature_ids: [],
+        objectiveId: 'obj_123',
+        featureId: [],
       } as any;
       await expect(tool.execute(input)).rejects.toThrow('Invalid parameters');
     });
 
-    it('should validate feature_ids contains strings', async () => {
+    it('should validate featureId contains strings', async () => {
       const input = {
-        objective_id: 'obj_123',
-        feature_ids: [123, 'feat_456'],
+        objectiveId: 'obj_123',
+        featureId: [123, 'feat_456'],
       } as any;
       await expect(tool.execute(input)).rejects.toThrow('Invalid parameters');
     });
 
     it('should accept valid input', () => {
       const validInput = {
-        objective_id: 'obj_123',
-        feature_ids: ['feat_456', 'feat_789', 'feat_012'],
+        objectiveId: 'obj_123',
+        featureId: ['feat_456', 'feat_789', 'feat_012'],
       };
       const validation = tool.validateParams(validInput);
       expect(validation.valid).toBe(true);
@@ -89,8 +89,8 @@ describe('LinkFeaturesToObjectiveTool', () => {
 
     it('should accept single feature ID', () => {
       const validInput = {
-        objective_id: 'obj_123',
-        feature_ids: ['feat_456'],
+        objectiveId: 'obj_123',
+        featureId: ['feat_456'],
       };
       const validation = tool.validateParams(validInput);
       expect(validation.valid).toBe(true);
@@ -100,11 +100,11 @@ describe('LinkFeaturesToObjectiveTool', () => {
   describe('execute', () => {
     it('should link features to objective with valid input', async () => {
       const validInput = {
-        objective_id: 'obj_123',
-        feature_ids: ['feat_456', 'feat_789', 'feat_012'],
+        objectiveId: 'obj_123',
+        featureId: ['feat_456', 'feat_789', 'feat_012'],
       };
       const expectedResponse = {
-        objective_id: 'obj_123',
+        objectiveId: 'obj_123',
         linked_features: [
           {
             id: 'feat_456',
@@ -133,7 +133,7 @@ describe('LinkFeaturesToObjectiveTool', () => {
       const result = await tool.execute(validInput);
 
       expect(mockClient.post).toHaveBeenCalledWith('/objectives/obj_123/features', {
-        feature_ids: ['feat_456', 'feat_789', 'feat_012'],
+        featureId: ['feat_456', 'feat_789', 'feat_012'],
       });
       expect(result).toMatchObject({
         content: expect.arrayContaining([
@@ -151,11 +151,11 @@ describe('LinkFeaturesToObjectiveTool', () => {
 
     it('should link single feature to objective', async () => {
       const validInput = {
-        objective_id: 'obj_123',
-        feature_ids: ['feat_456'],
+        objectiveId: 'obj_123',
+        featureId: ['feat_456'],
       };
       const expectedResponse = {
-        objective_id: 'obj_123',
+        objectiveId: 'obj_123',
         linked_features: [
           {
             id: 'feat_456',
@@ -172,7 +172,7 @@ describe('LinkFeaturesToObjectiveTool', () => {
       const result = await tool.execute(validInput);
 
       expect(mockClient.post).toHaveBeenCalledWith('/objectives/obj_123/features', {
-        feature_ids: ['feat_456'],
+        featureId: ['feat_456'],
       });
       expect(result).toMatchObject({
         content: expect.arrayContaining([
@@ -190,11 +190,11 @@ describe('LinkFeaturesToObjectiveTool', () => {
 
     it('should handle partial success (some features linked)', async () => {
       const validInput = {
-        objective_id: 'obj_123',
-        feature_ids: ['feat_456', 'feat_invalid', 'feat_789'],
+        objectiveId: 'obj_123',
+        featureId: ['feat_456', 'feat_invalid', 'feat_789'],
       };
       const expectedResponse = {
-        objective_id: 'obj_123',
+        objectiveId: 'obj_123',
         linked_features: [
           {
             id: 'feat_456',
@@ -223,7 +223,7 @@ describe('LinkFeaturesToObjectiveTool', () => {
       const result = await tool.execute(validInput);
 
       expect(mockClient.post).toHaveBeenCalledWith('/objectives/obj_123/features', {
-        feature_ids: ['feat_456', 'feat_invalid', 'feat_789'],
+        featureId: ['feat_456', 'feat_invalid', 'feat_789'],
       });
       expect(result).toMatchObject({
         content: expect.arrayContaining([
@@ -241,8 +241,8 @@ describe('LinkFeaturesToObjectiveTool', () => {
 
     it('should handle API errors gracefully', async () => {
       const validInput = {
-        objective_id: 'obj_123',
-        feature_ids: ['feat_456', 'feat_789'],
+        objectiveId: 'obj_123',
+        featureId: ['feat_456', 'feat_789'],
       };
       
       mockClient.post.mockRejectedValueOnce(new Error('API Error'));
@@ -265,8 +265,8 @@ describe('LinkFeaturesToObjectiveTool', () => {
 
     it('should handle objective not found errors', async () => {
       const validInput = {
-        objective_id: 'obj_nonexistent',
-        feature_ids: ['feat_456'],
+        objectiveId: 'obj_nonexistent',
+        featureId: ['feat_456'],
       };
       
       const error = new Error('Objective not found');
@@ -299,8 +299,8 @@ describe('LinkFeaturesToObjectiveTool', () => {
 
     it('should handle authentication errors', async () => {
       const validInput = {
-        objective_id: 'obj_123',
-        feature_ids: ['feat_456'],
+        objectiveId: 'obj_123',
+        featureId: ['feat_456'],
       };
       
       const error = new Error('Authentication failed');
@@ -333,8 +333,8 @@ describe('LinkFeaturesToObjectiveTool', () => {
 
     it('should handle forbidden errors', async () => {
       const validInput = {
-        objective_id: 'obj_123',
-        feature_ids: ['feat_456'],
+        objectiveId: 'obj_123',
+        featureId: ['feat_456'],
       };
       
       const error = new Error('Insufficient permissions');
@@ -367,8 +367,8 @@ describe('LinkFeaturesToObjectiveTool', () => {
 
     it('should handle validation errors from API', async () => {
       const validInput = {
-        objective_id: 'obj_123',
-        feature_ids: ['feat_456'],
+        objectiveId: 'obj_123',
+        featureId: ['feat_456'],
       };
       
       const error = new Error('Validation error');
@@ -380,7 +380,7 @@ describe('LinkFeaturesToObjectiveTool', () => {
           message: 'Invalid input parameters',
           details: {
             fields: {
-              feature_ids: 'One or more feature IDs are invalid',
+              featureId: 'One or more feature IDs are invalid',
             },
           },
         },
@@ -406,8 +406,8 @@ describe('LinkFeaturesToObjectiveTool', () => {
     it('should throw error if client not initialized', async () => {
       const uninitializedTool = new LinkFeaturesToObjectiveTool(null as any, mockLogger);
       const validInput = {
-        objective_id: 'obj_123',
-        feature_ids: ['feat_456'],
+        objectiveId: 'obj_123',
+        featureId: ['feat_456'],
       };
       const result = await uninitializedTool.execute(validInput);
 
@@ -429,7 +429,7 @@ describe('LinkFeaturesToObjectiveTool', () => {
   describe('response transformation', () => {
     it('should transform API response correctly', async () => {
       const apiResponse = {
-        objective_id: 'obj_123',
+        objectiveId: 'obj_123',
         linked_features: [
           {
             id: 'feat_456',
@@ -444,8 +444,8 @@ describe('LinkFeaturesToObjectiveTool', () => {
       mockClient.post.mockResolvedValueOnce(apiResponse);
 
       const result = await tool.execute({
-        objective_id: 'obj_123',
-        feature_ids: ['feat_456'],
+        objectiveId: 'obj_123',
+        featureId: ['feat_456'],
       });
 
       expect(result).toMatchObject({
@@ -460,7 +460,7 @@ describe('LinkFeaturesToObjectiveTool', () => {
         success: true,
         data: apiResponse,
       });
-      expect(response.data).toHaveProperty('objective_id', 'obj_123');
+      expect(response.data).toHaveProperty('objectiveId', 'obj_123');
       expect(response.data).toHaveProperty('total_linked', 1);
       expect(response.data.linked_features[0]).toHaveProperty('id', 'feat_456');
       expect(response.data.linked_features[0]).toHaveProperty('linked_at');
@@ -468,7 +468,7 @@ describe('LinkFeaturesToObjectiveTool', () => {
 
     it('should handle responses with failed links', async () => {
       const apiResponse = {
-        objective_id: 'obj_123',
+        objectiveId: 'obj_123',
         linked_features: [
           {
             id: 'feat_456',
@@ -493,8 +493,8 @@ describe('LinkFeaturesToObjectiveTool', () => {
       mockClient.post.mockResolvedValueOnce(apiResponse);
 
       const result = await tool.execute({
-        objective_id: 'obj_123',
-        feature_ids: ['feat_456', 'feat_invalid', 'feat_archived'],
+        objectiveId: 'obj_123',
+        featureId: ['feat_456', 'feat_invalid', 'feat_archived'],
       });
 
       expect(result).toMatchObject({
@@ -517,7 +517,7 @@ describe('LinkFeaturesToObjectiveTool', () => {
 
     it('should handle empty linked features response', async () => {
       const apiResponse = {
-        objective_id: 'obj_123',
+        objectiveId: 'obj_123',
         linked_features: [],
         total_linked: 0,
         failed_links: [
@@ -531,8 +531,8 @@ describe('LinkFeaturesToObjectiveTool', () => {
       mockClient.post.mockResolvedValueOnce(apiResponse);
 
       const result = await tool.execute({
-        objective_id: 'obj_123',
-        feature_ids: ['feat_invalid'],
+        objectiveId: 'obj_123',
+        featureId: ['feat_invalid'],
       });
 
       expect(result).toMatchObject({

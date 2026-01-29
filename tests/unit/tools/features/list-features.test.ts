@@ -120,7 +120,7 @@ describe('ListFeaturesTool', () => {
 
       const result = await tool.execute({});
 
-      expect(mockClient.get).toHaveBeenCalledWith('/features', {});
+      expect(mockClient.get).toHaveBeenCalledWith('/features', { pageLimit: 100 });
       expect(result).toMatchObject({
         content: expect.arrayContaining([
           expect.objectContaining({
@@ -143,12 +143,10 @@ describe('ListFeaturesTool', () => {
 
       await tool.execute(filters);
 
+      // API only accepts parent.id filter, other filters are client-side
       expect(mockClient.get).toHaveBeenCalledWith('/features', {
-          status: 'in_progress',
-          product_id: 'prod_789',
-          owner_email: 'john.doe@example.com',
-          tags: 'mobile,security',
-          search: 'authentication',
+          'parent.id': 'prod_789',
+          pageLimit: 100,
       });
     });
 
@@ -162,8 +160,8 @@ describe('ListFeaturesTool', () => {
 
       await tool.execute(paginationParams);
 
-      // Note: Pagination is handled client-side, not passed to API
-      expect(mockClient.get).toHaveBeenCalledWith('/features', {});
+      // pageLimit is sent to API, offset is handled client-side
+      expect(mockClient.get).toHaveBeenCalledWith('/features', { pageLimit: 50 });
     });
 
     it('should handle sorting parameters', async () => {
@@ -177,7 +175,7 @@ describe('ListFeaturesTool', () => {
       await tool.execute(sortParams);
 
       // Note: Sorting is handled client-side, not passed to API
-      expect(mockClient.get).toHaveBeenCalledWith('/features', {});
+      expect(mockClient.get).toHaveBeenCalledWith('/features', { pageLimit: 100 });
     });
 
     it('should handle empty results', async () => {
@@ -268,7 +266,7 @@ describe('ListFeaturesTool', () => {
       const result = await tool.execute({}) as any;
 
       expect(result).toHaveProperty('content');
-      expect(result.content[0].text).toContain('Found 2 features');
+      expect(result.content[0].text).toContain('Found 2 matching features');
       expect(result.content[0].text).toContain('Feature 1');
       expect(result.content[0].text).toContain('Feature 2');
     });
@@ -286,7 +284,7 @@ describe('ListFeaturesTool', () => {
       const result = await tool.execute({}) as any;
 
       expect(result).toHaveProperty('content');
-      expect(result.content[0].text).toContain('Found 2 features');
+      expect(result.content[0].text).toContain('Found 2 matching features');
       expect(result.content[0].text).toContain('Feature 1');
       expect(result.content[0].text).toContain('Feature 2');
     });

@@ -8,7 +8,7 @@ interface ListKeyResultsParams {
   objective_id?: string;
   metric_type?: 'number' | 'percentage' | 'currency';
   limit?: number;
-  offset?: number;
+  pageCursor?: string;
 }
 
 export class ListKeyResultsTool extends BaseTool<ListKeyResultsParams> {
@@ -31,15 +31,13 @@ export class ListKeyResultsTool extends BaseTool<ListKeyResultsParams> {
           limit: {
             type: 'number',
             minimum: 1,
-            maximum: 100,
-            default: 20,
+            maximum: 2000,
+            default: 100,
             description: 'Maximum number of key results to return',
           },
-          offset: {
-            type: 'number',
-            minimum: 0,
-            default: 0,
-            description: 'Number of key results to skip',
+          pageCursor: {
+            type: 'string',
+            description: 'Cursor for pagination to get next page',
           },
         },
       },
@@ -57,15 +55,16 @@ export class ListKeyResultsTool extends BaseTool<ListKeyResultsParams> {
     try {
       this.logger.info('Listing key results');
 
-      const queryParams: Record<string, any> = {};
+      const queryParams: Record<string, any> = {
+        pageLimit: Math.min(params.limit || 100, 2000),
+      };
       if (params.objective_id) queryParams.objective_id = params.objective_id;
       if (params.metric_type) queryParams.metric_type = params.metric_type;
-      if (params.limit) queryParams.limit = params.limit;
-      if (params.offset) queryParams.offset = params.offset;
+      if (params.pageCursor) queryParams.pageCursor = params.pageCursor;
 
       const response = await this.apiClient.makeRequest({
         method: 'GET',
-        endpoint: '/keyresults',
+        endpoint: '/key-results',
         params: queryParams,
       });
 

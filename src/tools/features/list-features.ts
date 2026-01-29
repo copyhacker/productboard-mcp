@@ -88,22 +88,30 @@ export class ListFeaturesTool extends BaseTool<ListFeaturesParams> {
   }
 
   protected async executeInternal(params: ListFeaturesParams): Promise<unknown> {
-    // Build query parameters with only supported API parameters
+    // Build query parameters - Productboard API supports parent.id filtering
     const queryParams: Record<string, any> = {};
 
-    // Add supported parameters only
-    if (params.status) queryParams.status = params.status;
-    if (params.product_id) queryParams.product_id = params.product_id;
-    if (params.component_id) queryParams.component_id = params.component_id;
-    if (params.owner_email) queryParams.owner_email = params.owner_email;
-    if (params.search) queryParams.search = params.search;
-    if (params.tags && params.tags.length > 0) {
-      queryParams.tags = params.tags.join(',');
+    // API-level filtering using parent.id
+    // Note: product_id and component_id map to parent.id in the Productboard API
+    if (params.product_id) {
+      queryParams['parent.id'] = params.product_id;
+    }
+    if (params.component_id) {
+      // Component filtering also uses parent.id (components are parents too)
+      queryParams['parent.id'] = params.component_id;
     }
 
-    // Note: Productboard API /features endpoint does not support limit, offset, sort, order parameters
+    // Pagination - use pageLimit (1-2000, default 100)
+    const pageLimit = Math.min(params.limit || 100, 2000);
+    queryParams.pageLimit = pageLimit;
+
+    this.logger.debug('Fetching features with API-level filtering', {
+      queryParams,
+      clientSideFilters: { status: params.status, owner_email: params.owner_email, search: params.search, tags: params.tags }
+    });
+
     const response = await this.apiClient.get('/features', queryParams);
-    
+
     // Extract feature data
     let features: any[] = [];
     if (response && (response as any).data) {
@@ -111,11 +119,76 @@ export class ListFeaturesTool extends BaseTool<ListFeaturesParams> {
     } else if (Array.isArray(response)) {
       features = response;
     }
-    
-    // Apply client-side pagination if requested
-    const requestedLimit = params.limit || 20;
+
+    // Apply client-side filtering for parameters not supported by the API
+    // Note: product_id and component_id are now handled by API-level filtering
+    let filteredFeatures = features;
+
+    if (params.status) {
+      filteredFeatures = filteredFeatures.filter(f =>
+        f.status?.name?.toLowerCase() === params.status?.toLowerCase()
+      );
+    }
+
+    if (params.owner_email) {
+      filteredFeatures = filteredFeatures.filter(f =>
+        f.owner?.email?.toLowerCase() === params.owner_email?.toLowerCase()
+      );
+    }
+
+    if (params.search) {
+      const searchLower = params.search.toLowerCase();
+      filteredFeatures = filteredFeatures.filter(f =>
+        f.name?.toLowerCase().includes(searchLower) ||
+        f.description?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    if (params.tags && params.tags.length > 0) {
+      filteredFeatures = filteredFeatures.filter(f => {
+        if (!f.tags || !Array.isArray(f.tags)) return false;
+        const featureTags = f.tags.map((t: any) => t.name || t).map((t: string) => t.toLowerCase());
+        return params.tags!.every(tag => featureTags.includes(tag.toLowerCase()));
+      });
+    }
+
+    // Apply client-side sorting
+    if (params.sort) {
+      filteredFeatures.sort((a, b) => {
+        let aVal, bVal;
+        switch (params.sort) {
+          case 'name':
+            aVal = a.name || '';
+            bVal = b.name || '';
+            break;
+          case 'created_at':
+            aVal = a.createdAt || '';
+            bVal = b.createdAt || '';
+            break;
+          case 'updated_at':
+            aVal = a.updatedAt || '';
+            bVal = b.updatedAt || '';
+            break;
+          case 'priority':
+            aVal = a.priority || 0;
+            bVal = b.priority || 0;
+            break;
+          default:
+            return 0;
+        }
+
+        if (params.order === 'asc') {
+          return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+        } else {
+          return aVal > bVal ? -1 : aVal < bVal ? 1 : 0;
+        }
+      });
+    }
+
+    // Apply client-side pagination (for offset support, as API uses cursor-based pagination)
     const requestedOffset = params.offset || 0;
-    const paginatedFeatures = features.slice(requestedOffset, requestedOffset + requestedLimit);
+    const requestedLimit = params.limit || 20;
+    const paginatedFeatures = filteredFeatures.slice(requestedOffset, requestedOffset + requestedLimit);
     
     // Helper function to strip HTML tags
     const stripHtml = (html: string): string => {
@@ -142,7 +215,7 @@ export class ListFeaturesTool extends BaseTool<ListFeaturesParams> {
     
     // Create a text summary of the features
     const summary = formattedFeatures.length > 0
-      ? `Found ${features.length} features total, showing ${formattedFeatures.length} features:\n\n` +
+      ? `Found ${filteredFeatures.length} matching features (from ${features.length} total), showing ${formattedFeatures.length}:\n\n` +
         formattedFeatures.map((f, i) => 
           `${i + 1}. ${f.name}\n` +
           `   Status: ${f.status}\n` +

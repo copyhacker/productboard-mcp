@@ -32,38 +32,42 @@ describe('ListNotesTool', () => {
       expect(tool.parameters).toMatchObject({
         type: 'object',
         properties: {
-          feature_id: {
+          featureId: {
             type: 'string',
-            description: 'Filter notes linked to a specific feature',
           },
-          customer_email: {
+          companyId: {
             type: 'string',
-            description: 'Filter by customer email',
           },
-          company_name: {
+          ownerEmail: {
             type: 'string',
-            description: 'Filter by company',
           },
-          tags: {
+          anyTag: {
             type: 'array',
             items: { type: 'string' },
-            description: 'Filter by tags',
           },
-          date_from: {
+          allTags: {
+            type: 'array',
+            items: { type: 'string' },
+          },
+          term: {
+            type: 'string',
+          },
+          createdFrom: {
             type: 'string',
             format: 'date',
-            description: 'Filter notes created after this date',
           },
-          date_to: {
+          createdTo: {
             type: 'string',
             format: 'date',
-            description: 'Filter notes created before this date',
           },
           limit: {
             type: 'integer',
             minimum: 1,
-            maximum: 100,
-            default: 20,
+            maximum: 2000,
+            default: 100,
+          },
+          pageCursor: {
+            type: 'string',
           },
         },
       });
@@ -97,7 +101,7 @@ describe('ListNotesTool', () => {
       expect(mockApiClient.makeRequest).toHaveBeenCalledWith({
         method: 'GET',
         endpoint: '/notes',
-        params: { limit: 20 },
+        params: { pageLimit: 100 },
       });
 
       expect(result).toEqual({
@@ -123,12 +127,12 @@ describe('ListNotesTool', () => {
         links: {},
       });
 
-      const result = await tool.execute({ feature_id: 'feat-123' });
+      const result = await tool.execute({ featureId: 'feat-123' });
 
       expect(mockApiClient.makeRequest).toHaveBeenCalledWith({
         method: 'GET',
         endpoint: '/notes',
-        params: { feature_id: 'feat-123', limit: 20 },
+        params: { featureId: 'feat-123', pageLimit: 100 },
       });
 
       expect((result as any).content[0].text).toContain('Found 1 note');
@@ -141,12 +145,12 @@ describe('ListNotesTool', () => {
         links: {},
       });
 
-      await tool.execute({ customer_email: 'customer1@example.com' });
+      await tool.execute({ ownerEmail: 'customer1@example.com' });
 
       expect(mockApiClient.makeRequest).toHaveBeenCalledWith({
         method: 'GET',
         endpoint: '/notes',
-        params: { customer_email: 'customer1@example.com', limit: 20 },
+        params: { ownerEmail: 'customer1@example.com', pageLimit: 100 },
       });
     });
 
@@ -156,12 +160,12 @@ describe('ListNotesTool', () => {
         links: {},
       });
 
-      await tool.execute({ company_name: 'Acme Corp' });
+      await tool.execute({ companyId: 'company-123' });
 
       expect(mockApiClient.makeRequest).toHaveBeenCalledWith({
         method: 'GET',
         endpoint: '/notes',
-        params: { company_name: 'Acme Corp', limit: 20 },
+        params: { companyId: 'company-123', pageLimit: 100 },
       });
     });
 
@@ -171,12 +175,12 @@ describe('ListNotesTool', () => {
         links: {},
       });
 
-      await tool.execute({ tags: ['important', 'feature-request'] });
+      await tool.execute({ anyTag: ['important', 'feature-request'] });
 
       expect(mockApiClient.makeRequest).toHaveBeenCalledWith({
         method: 'GET',
         endpoint: '/notes',
-        params: { tags: ['important', 'feature-request'], limit: 20 },
+        params: { anyTag: 'important,feature-request', pageLimit: 100 },
       });
     });
 
@@ -187,17 +191,17 @@ describe('ListNotesTool', () => {
       });
 
       await tool.execute({
-        date_from: '2025-01-01',
-        date_to: '2025-01-31',
+        createdFrom: '2025-01-01',
+        createdTo: '2025-01-31',
       });
 
       expect(mockApiClient.makeRequest).toHaveBeenCalledWith({
         method: 'GET',
         endpoint: '/notes',
         params: {
-          date_from: '2025-01-01',
-          date_to: '2025-01-31',
-          limit: 20,
+          createdFrom: '2025-01-01',
+          createdTo: '2025-01-31',
+          pageLimit: 100,
         },
       });
     });
@@ -213,7 +217,7 @@ describe('ListNotesTool', () => {
       expect(mockApiClient.makeRequest).toHaveBeenCalledWith({
         method: 'GET',
         endpoint: '/notes',
-        params: { limit: 50 },
+        params: { pageLimit: 50 },
       });
     });
 
@@ -240,12 +244,12 @@ describe('ListNotesTool', () => {
 
     it('should validate limit range', async () => {
       await expect(tool.execute({ limit: 0 })).rejects.toThrow('Invalid parameters');
-      await expect(tool.execute({ limit: 101 })).rejects.toThrow('Invalid parameters');
+      await expect(tool.execute({ limit: 2001 })).rejects.toThrow('Invalid parameters');
     });
 
     it('should validate date format', async () => {
       await expect(
-        tool.execute({ date_from: 'invalid-date' })
+        tool.execute({ createdFrom: 'invalid-date' })
       ).rejects.toThrow('Invalid parameters');
     });
 
