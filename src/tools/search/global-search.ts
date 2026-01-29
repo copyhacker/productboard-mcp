@@ -135,51 +135,51 @@ export class GlobalSearchTool extends BaseTool<GlobalSearchParams> {
       
       // Process features
       if (results.features && results.features.length > 0) {
-        sections.push(`FEATURES (${results.features.length}):\n` +
+        sections.push(`FEATURES (${results.features.length}):\n${ 
           results.features.map((f: any, i: number) => 
             `${i + 1}. ${f.name || 'Untitled Feature'}\n` +
             `   Status: ${f.status?.name || 'Unknown'}\n` +
             `   Description: ${(f.description || 'No description').substring(0, 100)}${f.description?.length > 100 ? '...' : ''}`
-          ).join('\n\n'));
+          ).join('\n\n')}`);
       }
       
       // Process notes
       if (results.notes && results.notes.length > 0) {
-        sections.push(`NOTES (${results.notes.length}):\n` +
+        sections.push(`NOTES (${results.notes.length}):\n${ 
           results.notes.map((n: any, i: number) => 
             `${i + 1}. ${n.title || n.content?.substring(0, 50) || 'Untitled Note'}\n` +
             `   Customer: ${n.customer?.email || 'Unknown'}\n` +
             `   Content: ${(n.content || '').substring(0, 100)}${n.content?.length > 100 ? '...' : ''}`
-          ).join('\n\n'));
+          ).join('\n\n')}`);
       }
       
       // Process products
       if (results.products && results.products.length > 0) {
-        sections.push(`PRODUCTS (${results.products.length}):\n` +
+        sections.push(`PRODUCTS (${results.products.length}):\n${ 
           results.products.map((p: any, i: number) => 
             `${i + 1}. ${p.name || 'Untitled Product'}\n` +
             `   Description: ${(p.description || 'No description').substring(0, 100)}${p.description?.length > 100 ? '...' : ''}`
-          ).join('\n\n'));
+          ).join('\n\n')}`);
       }
       
       // Process objectives
       if (results.objectives && results.objectives.length > 0) {
-        sections.push(`OBJECTIVES (${results.objectives.length}):\n` +
+        sections.push(`OBJECTIVES (${results.objectives.length}):\n${ 
           results.objectives.map((o: any, i: number) => 
             `${i + 1}. ${o.name || 'Untitled Objective'}\n` +
             `   Status: ${o.status || 'Unknown'}\n` +
             `   Description: ${(o.description || 'No description').substring(0, 100)}${o.description?.length > 100 ? '...' : ''}`
-          ).join('\n\n'));
+          ).join('\n\n')}`);
       }
       
       // Process users
       if (results.users && results.users.length > 0) {
-        sections.push(`USERS (${results.users.length}):\n` +
+        sections.push(`USERS (${results.users.length}):\n${ 
           results.users.map((u: any, i: number) => 
             `${i + 1}. ${u.name || 'Unknown User'}\n` +
             `   Email: ${u.email || 'No email'}\n` +
             `   Role: ${u.role || 'Unknown'}`
-          ).join('\n\n'));
+          ).join('\n\n')}`);
       }
       
       const summary = sections.length > 0

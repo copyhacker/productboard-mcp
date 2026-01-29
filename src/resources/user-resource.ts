@@ -38,7 +38,7 @@ export class UserResource implements Resource {
           timestamp: new Date().toISOString(),
         },
         currentUser: currentUser.data || null,
-        teamUsers: teamUsers,
+        teamUsers,
         schema: {
           properties: {
             id: { type: 'string', description: 'User unique identifier' },

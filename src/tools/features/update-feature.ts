@@ -74,7 +74,7 @@ export class UpdateFeatureTool extends BaseTool<UpdateFeatureParams> {
     }
 
     // Additional validation: ensure at least one field to update
-    const { id, ...updateFields } = params as UpdateFeatureParams;
+    const { id: _id, ...updateFields } = params as UpdateFeatureParams;
     if (Object.keys(updateFields).length === 0) {
       return {
         valid: false,

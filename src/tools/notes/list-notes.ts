@@ -145,14 +145,14 @@ export class ListNotesTool extends BaseTool<ListNotesParams> {
     
     // Create a text summary of the notes
     const summary = formattedNotes.length > 0
-      ? `Found ${formattedNotes.length} notes:\n\n` +
+      ? `Found ${formattedNotes.length} notes:\n\n${ 
         formattedNotes.map((n, i) => 
           `${i + 1}. ${n.title}\n` +
           `   Customer: ${n.customer}\n` +
           `   Company: ${n.company}\n` +
           `   Content: ${n.content.substring(0, 100)}${n.content.length > 100 ? '...' : ''}\n` +
           `   Tags: ${n.tags.length > 0 ? n.tags.join(', ') : 'None'}\n`
-        ).join('\n')
+        ).join('\n')}`
       : 'No notes found.';
     
     // Return in MCP expected format

@@ -38,7 +38,7 @@ export class MCPProtocolHandler implements ProtocolHandler {
         throw new ProtocolError('Invalid request structure');
       }
       
-      return data as MCPRequest;
+      return data;
     } catch (error) {
       if (error instanceof SyntaxError) {
         throw new ProtocolError('Invalid JSON');

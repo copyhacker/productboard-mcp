@@ -69,7 +69,7 @@ export class ListProductsTool extends BaseTool<ListProductsParams> {
       return {
         success: true,
         data: {
-          products: products,
+          products,
           total: products.length,
         },
       };
