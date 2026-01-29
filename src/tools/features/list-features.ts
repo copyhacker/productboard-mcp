@@ -215,9 +215,10 @@ export class ListFeaturesTool extends BaseTool<ListFeaturesParams> {
     
     // Create a text summary of the features
     const summary = formattedFeatures.length > 0
-      ? `Found ${filteredFeatures.length} matching features (from ${features.length} total), showing ${formattedFeatures.length}:\n\n${ 
-        formattedFeatures.map((f, i) => 
+      ? `Found ${filteredFeatures.length} matching features (from ${features.length} total), showing ${formattedFeatures.length}:\n\n${
+        formattedFeatures.map((f, i) =>
           `${i + 1}. ${f.name}\n` +
+          `   ID: ${f.id}\n` +
           `   Status: ${f.status}\n` +
           `   Owner: ${f.owner}\n` +
           `   Description: ${f.description || 'No description'}\n`

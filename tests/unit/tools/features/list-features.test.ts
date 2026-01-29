@@ -250,6 +250,7 @@ describe('ListFeaturesTool', () => {
 
       const result = await tool.execute({}) as any;
 
+      expect(result.content[0].text).toContain('ID:');
       expect(result.content[0].text).toContain('Status:');
       expect(result.content[0].text).toContain('Owner:');
       expect(result.content[0].text).toContain('Description:');
