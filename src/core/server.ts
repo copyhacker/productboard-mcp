@@ -376,7 +376,7 @@ export class ProductboardMCPServer {
     // Check cache for read operations
     const cacheKey = cache.getCacheKey({ tool: toolName, method: toolName, params });
     const cachedResult = cache.get(cacheKey);
-    if (cachedResult !== null) {
+    if (cachedResult !== null && cachedResult !== undefined) {
       logger.debug(`Cache hit for tool: ${toolName}`);
       return cachedResult;
     }
